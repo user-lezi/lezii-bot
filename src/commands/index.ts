@@ -1,4 +1,10 @@
-import { Message, Events, SlashCommandBuilder, Routes } from "discord.js";
+import {
+  Message,
+  Events,
+  SlashCommandBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
+  Routes,
+} from "discord.js";
 import chalk from "chalk";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
@@ -16,7 +22,9 @@ export type SlashExecutor<S extends boolean> = S extends true
   : SE;
 
 export interface SlashCommand<S extends boolean = false> {
-  builder: SlashCommandBuilder;
+  builder: S extends true
+    ? SlashCommandSubcommandsOnlyBuilder
+    : SlashCommandBuilder;
   defer: boolean;
   execute: SlashExecutor<S>;
 }

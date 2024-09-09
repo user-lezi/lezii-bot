@@ -1,4 +1,4 @@
-import { Message, SlashCommandBuilder } from "discord.js";
+import { Message, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 import { type Client } from "../client";
 import { SlashContext } from "./context";
 export interface DeveloperCommand {
@@ -8,7 +8,7 @@ export interface DeveloperCommand {
 export type SE = (ctx: SlashContext) => void;
 export type SlashExecutor<S extends boolean> = S extends true ? Record<string, SE> : SE;
 export interface SlashCommand<S extends boolean = false> {
-    builder: SlashCommandBuilder;
+    builder: S extends true ? SlashCommandSubcommandsOnlyBuilder : SlashCommandBuilder;
     defer: boolean;
     execute: SlashExecutor<S>;
 }
