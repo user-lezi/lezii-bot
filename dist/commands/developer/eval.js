@@ -50,7 +50,7 @@ exports.default = {
             components: createComponents(true, true, false, embeds.length == 1, embeds.length == g + 1, false, false),
         });
         let collector = msg.createMessageComponentCollector({
-            time: 30000,
+            time: 30_000,
             filter: (i) => i.user.id == message.author.id,
         });
         collector.on("collect", async (i) => {

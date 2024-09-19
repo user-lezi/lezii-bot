@@ -14,7 +14,7 @@ export interface SlashCommand<S extends boolean = false> {
 }
 export declare class CommandManager {
     client: Client;
-    developer: Map<string, (client: Client, message: Message<boolean>) => void>;
+    developer: Map<string, (client: Client, message: Message) => void>;
     commands: Map<string, SlashCommand<boolean>>;
     constructor(client: Client);
     load(): void;

@@ -3,9 +3,13 @@ import {
   UserResolvable,
   GuildTextBasedChannel,
   EmbedBuilder,
+  Collection,
 } from "discord.js";
 import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
+
+import { PasswordGame } from "./classes/Games";
+
 export class Client extends _Client<true> {
   public _ = {
     devs: ["910837428862984213"],
@@ -14,6 +18,11 @@ export class Client extends _Client<true> {
     },
     color: {
       main: 0xb3c6ff,
+    },
+  };
+  public cache = {
+    games: {
+      password: new Collection<string, PasswordGame>(),
     },
   };
   public commands = new CommandManager(this);
@@ -37,7 +46,32 @@ export class Client extends _Client<true> {
             .setColor(this._.color.main),
         ],
       };
-      channel.send(message);
+      channel?.send(message);
+    });
+
+    this.on("interactionCreate", async (interaction) => {
+      if (interaction.isModalSubmit()) {
+        let customId = interaction.customId;
+        let [_, gameName, id] = customId.split("_");
+        if (_ !== "game") return;
+        if (id !== interaction.user.id) return;
+        if (gameName === "password") {
+          let game = this.cache.games.password.get(id);
+          if (!game) return;
+          game.listenModal(interaction);
+        }
+      }
+      if (interaction.isButton()) {
+        let customId = interaction.customId;
+        let [_, gameName, id] = customId.split("_");
+        if (_ !== "gamebtn") return;
+        if (id !== interaction.user.id) return;
+        if (gameName === "password") {
+          let game = this.cache.games.password.get(id);
+          if (!game) return;
+          game.listenButton(interaction);
+        }
+      }
     });
   }
 

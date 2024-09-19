@@ -1,6 +1,7 @@
-import { Client as _Client, UserResolvable } from "discord.js";
+import { Client as _Client, UserResolvable, Collection } from "discord.js";
 import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
+import { PasswordGame } from "./classes/Games";
 export declare class Client extends _Client<true> {
     _: {
         devs: string[];
@@ -9,6 +10,11 @@ export declare class Client extends _Client<true> {
         };
         color: {
             main: number;
+        };
+    };
+    cache: {
+        games: {
+            password: Collection<string, PasswordGame>;
         };
     };
     commands: CommandManager;

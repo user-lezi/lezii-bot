@@ -1,5 +1,5 @@
 import { Client } from "./client";
-
+require("dotenv").config();
 const client = new Client();
 
 client.on("ready", () => {

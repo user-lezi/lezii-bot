@@ -12,10 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^22.5.4",
+    "@napi-rs/canvas": "^0.1.55",
+    "@types/node": "^22.5.5",
     "chalk": "^4.1.2",
-    "discord.js": "^14.16.1",
+    "discord.js": "^14.16.2",
+    "dotenv": "^16.4.5",
     "prettier": "^3.3.3",
-    "typescript": "^5.3.2"
+    "typescript": "^5.6.2"
   }
 }

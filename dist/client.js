@@ -14,6 +14,11 @@ class Client extends discord_js_1.Client {
             main: 0xb3c6ff,
         },
     };
+    cache = {
+        games: {
+            password: new discord_js_1.Collection(),
+        },
+    };
     commands = new commands_1.CommandManager(this);
     util = new ClientUtils_1.ClientUtils(this);
     constructor() {
@@ -32,7 +37,37 @@ class Client extends discord_js_1.Client {
                         .setColor(this._.color.main),
                 ],
             };
-            channel.send(message);
+            channel?.send(message);
+        });
+        this.on("interactionCreate", async (interaction) => {
+            if (interaction.isModalSubmit()) {
+                let customId = interaction.customId;
+                let [_, gameName, id] = customId.split("_");
+                if (_ !== "game")
+                    return;
+                if (id !== interaction.user.id)
+                    return;
+                if (gameName === "password") {
+                    let game = this.cache.games.password.get(id);
+                    if (!game)
+                        return;
+                    game.listenModal(interaction);
+                }
+            }
+            if (interaction.isButton()) {
+                let customId = interaction.customId;
+                let [_, gameName, id] = customId.split("_");
+                if (_ !== "gamebtn")
+                    return;
+                if (id !== interaction.user.id)
+                    return;
+                if (gameName === "password") {
+                    let game = this.cache.games.password.get(id);
+                    if (!game)
+                        return;
+                    game.listenButton(interaction);
+                }
+            }
         });
     }
     isDev(user) {
