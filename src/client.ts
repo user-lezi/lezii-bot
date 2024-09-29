@@ -54,7 +54,15 @@ export class Client extends _Client<true> {
         let customId = interaction.customId;
         let [_, gameName, id] = customId.split("_");
         if (_ !== "game") return;
-        if (id !== interaction.user.id) return;
+        if (id !== interaction.user.id) {
+          interaction
+            .reply({
+              ephemeral: true,
+              content: "no.",
+            })
+            .catch(() => {});
+          return;
+        }
         if (gameName === "password") {
           let game = this.cache.games.password.get(id);
           if (!game) return;
@@ -65,7 +73,15 @@ export class Client extends _Client<true> {
         let customId = interaction.customId;
         let [_, gameName, id] = customId.split("_");
         if (_ !== "gamebtn") return;
-        if (id !== interaction.user.id) return;
+        if (id !== interaction.user.id) {
+          interaction
+            .reply({
+              ephemeral: true,
+              content: "no.",
+            })
+            .catch(() => {});
+          return;
+        }
         if (gameName === "password") {
           let game = this.cache.games.password.get(id);
           if (!game) return;

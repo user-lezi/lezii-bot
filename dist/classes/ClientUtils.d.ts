@@ -12,6 +12,7 @@ export declare class ClientUtils {
         KB: number;
         MB: number;
     };
+    parseMS(ms: number): string;
     roundN(n: number, decimals?: number): number;
     embed(): EmbedBuilder;
 }

@@ -15,7 +15,12 @@ export declare class PasswordGame {
     password: string;
     emoji: string[];
     ruleN: number;
-    _: any;
+    _: {
+        wordleAnswer: string | null;
+        captcha: string | null;
+        captchaImage: Buffer | null;
+        hadfire: boolean;
+    };
     message: Message | null;
     constructor(ctx: SlashContext);
     passedAllRules(): Promise<boolean>;

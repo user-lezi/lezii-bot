@@ -36,6 +36,24 @@ class ClientUtils {
             MB: this.roundN(size / 1024 / 1024),
         };
     }
+    parseMS(ms) {
+        let c = {
+            s: 1000,
+            m: 1000 * 60,
+            h: 1000 * 60 * 60,
+            d: 1000 * 60 * 60 * 24,
+        };
+        if (ms < 1000)
+            return ms + "ms";
+        let d = ms / c.d;
+        let h = (ms % c.d) / c.h;
+        let m = (ms % c.h) / c.m;
+        let s = (ms % c.s) / c.s;
+        return ((d >= 1 ? `${Math.floor(d)}d ` : "") +
+            (h >= 1 ? `${Math.floor(h)}h ` : "") +
+            (m >= 1 ? `${Math.floor(m)}m ` : "") +
+            (s >= 1 ? `${Math.floor(s)}s` : ""));
+    }
     roundN(n, decimals = 2) {
         return Number(n.toFixed(decimals));
     }

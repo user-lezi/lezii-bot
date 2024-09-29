@@ -64,9 +64,23 @@ exports.PasswordGameRules = [
                     r += i < a.length ? a[i] : b[i - a.length];
                 }
                 r += b[Math.floor(Math.random() * b.length)];
-                return (sumOfDigits(r) > 15 ? randomCaptcha(n) : r);
+                return sumOfDigits(r) > 15 ? randomCaptcha(n) : r;
             }
             return password.includes(p._.captcha);
+        },
+    },
+    {
+        id: "consecutiveNumbers",
+        rule: "The password must contain a sequence of three consecutive numbers.",
+        simple: true,
+        check: async function (password) {
+            let seqs = "012 123 234 345 456 567 678 789 890".split(" ");
+            for (let i = 0; i < seqs.length; i++) {
+                const seq = seqs[i];
+                if (password.includes(seq))
+                    return true;
+            }
+            return false;
         },
     },
     {
@@ -74,7 +88,7 @@ exports.PasswordGameRules = [
         rule: "The password must contain today's wordle answer.",
         simple: true,
         check: async function (password, p) {
-            p._.wordleAnswer ??= await getWordleAnswer();
+            p._.wordleAnswer ??= await getWordleAnswer(p);
             return password.toLowerCase().includes(p._.wordleAnswer);
         },
     },
@@ -91,7 +105,9 @@ exports.PasswordGameRules = [
         rule: "Oh no! The password is on fire!!!",
         simple: false,
         check: async function (password, p) {
-            return p?._.hadfire ? !password.includes("🔥") : false;
+            return p?._.hadfire
+                ? !password.includes("🔥")
+                : (await p?.fireThePassword(), false);
         },
     },
     {
@@ -123,6 +139,15 @@ exports.PasswordGameRules = [
                 "december",
             ];
             return months.some((m) => password.toLowerCase().includes(m));
+        },
+    },
+    {
+        id: "plength",
+        rule: "The password must include the length of the password.",
+        simple: true,
+        check: async function (password) {
+            let length = password.length;
+            return password.includes(length.toString());
         },
     },
 ];
@@ -266,17 +291,8 @@ class PasswordGame {
                     this.ruleN++;
                     passed = await this.passedAllRules();
                 }
-                if (passed)
+                if (!!passed)
                     this.ruleN++;
-                if (this.rulesCompleted()) {
-                    let embed = this.ctx.util
-                        .embed()
-                        .setTitle("Password Game")
-                        .setDescription(`> ${this.password}\n\n**You have completed all the rules at once!!!**\nYour password length is ${this.password.length}`);
-                    await am.editReply({ embeds: [embed] });
-                    this.ctx.client.cache.games.password.delete(this.ctx.user.id);
-                    return;
-                }
             }
             let message = await this.makeMessage();
             this.message = await am.editReply(message);
@@ -305,6 +321,9 @@ class PasswordGame {
             embeds[0].addFields({
                 name: "Password Length",
                 value: `**${this.password.length}** Characters`,
+            }, {
+                name: "Time Spent",
+                value: `**${this.ctx.util.parseMS(Date.now() - this.time)}**`,
             });
             await this.message.edit({
                 components: [],
@@ -327,7 +346,20 @@ class PasswordGame {
     }
 }
 exports.PasswordGame = PasswordGame;
-async function getWordleAnswer() {
+async function getWordleAnswer(p) {
+    if (p.message)
+        p.message
+            .reply({
+            content: `Get your wordle answer here. **[www.nytimes.com](https://www.nytimes.com/games/wordle/index.html)**`,
+        })
+            .then((msg) => {
+            setTimeout(() => {
+                if (msg.deletable) {
+                    msg.delete().catch(() => { });
+                }
+            }, 10 * 1000);
+        })
+            .catch(() => { });
     let api = `https://www.nytimes.com/svc/wordle/v2/YYYY-MM-DD.json`;
     let YYYY = new Date().getFullYear();
     let MM = new Date().getMonth() + 1;
@@ -336,13 +368,12 @@ async function getWordleAnswer() {
         .replace("YYYY", YYYY.toString())
         .replace("MM", MM.toString().padStart(2, "0"))
         .replace("DD", DD.toString().padStart(2, "0"));
-    console.log(url);
     let res = await fetch(url);
     let json = await res.json();
     return json.solution;
 }
 async function createCaptchaImage(text) {
-    let height = 90;
+    let height = 100;
     let width = 150;
     let canvas = (0, canvas_1.createCanvas)(width, height);
     let ctx = canvas.getContext("2d");
@@ -366,7 +397,7 @@ async function createCaptchaImage(text) {
         ctx.fill();
     }
     /* Random Lines */
-    ctx.strokeStyle = ctx.fillStyle = "#000000";
+    ctx.strokeStyle = ctx.fillStyle = "#101010f0";
     let lineWidth = 3;
     let lines = Math.floor(Math.random() * 6) + 3;
     for (let i = 0; i < lines; i++) {
