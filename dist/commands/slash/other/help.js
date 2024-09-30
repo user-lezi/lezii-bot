@@ -13,7 +13,7 @@ exports.default = {
         }
         let categories = {
             Games: ["game password", "game uncache"],
-            Utility: ["stats", "help"],
+            Utility: ["stats", "help", "define"],
         };
         let embed = ctx.util.embed();
         for (const category in categories) {

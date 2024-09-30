@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandsOnlyBuilder,
   Routes,
+  SlashCommandOptionsOnlyBuilder,
 } from "discord.js";
 import chalk from "chalk";
 import { readdirSync, statSync } from "fs";
@@ -24,7 +25,7 @@ export type SlashExecutor<S extends boolean> = S extends true
 export interface SlashCommand<S extends boolean = false> {
   builder: S extends true
     ? SlashCommandSubcommandsOnlyBuilder
-    : SlashCommandBuilder;
+    : SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
   defer: boolean;
   execute: SlashExecutor<S>;
 }
