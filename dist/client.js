@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const discord_js_1 = require("discord.js");
 const commands_1 = require("./commands");
 const ClientUtils_1 = require("./classes/ClientUtils");
+const chalk_1 = __importDefault(require("chalk"));
 class Client extends discord_js_1.Client {
     _ = {
         devs: ["910837428862984213"],
@@ -27,7 +31,15 @@ class Client extends discord_js_1.Client {
         });
         this.commands.load();
         this.on("ready", () => {
-            this.commands.registerSlashCommands();
+            this.commands
+                .registerSlashCommands()
+                .then(() => this.application
+                .fetch()
+                .then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
+                1) &&
+                this.application.commands
+                    .fetch()
+                    .then(() => console.log(chalk_1.default.greenBright("!! Fetched all the application commands")))));
             let channel = this.channels.cache.get(this._.channels.readyLog);
             let message = {
                 embeds: [

@@ -9,6 +9,7 @@ import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
 
 import { PasswordGame } from "./classes/Games";
+import chalk from "chalk";
 
 export class Client extends _Client<true> {
   public _ = {
@@ -34,7 +35,28 @@ export class Client extends _Client<true> {
     this.commands.load();
 
     this.on("ready", () => {
-      this.commands.registerSlashCommands();
+      this.commands
+        .registerSlashCommands()
+        .then(() =>
+          this.application
+            .fetch()
+            .then(
+              () =>
+                (console.log(
+                  chalk.greenBright("!! Fetched the application information"),
+                ),
+                1) &&
+                this.application.commands
+                  .fetch()
+                  .then(() =>
+                    console.log(
+                      chalk.greenBright(
+                        "!! Fetched all the application commands",
+                      ),
+                    ),
+                  ),
+            ),
+        );
       let channel = this.channels.cache.get(
         this._.channels.readyLog,
       ) as GuildTextBasedChannel;

@@ -7,6 +7,12 @@ export class SlashContext {
     public interaction: ChatInputCommandInteraction,
   ) {}
 
+  public get application() {
+    return this.client.application;
+  }
+  public get applicationCommands() {
+    return this.application.commands.cache;
+  }
   public get user() {
     return this.interaction.user;
   }

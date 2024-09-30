@@ -8,6 +8,12 @@ class SlashContext {
         this.client = client;
         this.interaction = interaction;
     }
+    get application() {
+        return this.client.application;
+    }
+    get applicationCommands() {
+        return this.application.commands.cache;
+    }
     get user() {
         return this.interaction.user;
     }
