@@ -53,19 +53,6 @@ exports.PasswordGameRules = [
         check: async function (password, p) {
             p._.captcha ??= randomCaptcha(5);
             p._.captchaImage ??= await createCaptchaImage(p._.captcha);
-            function randomCaptcha(n) {
-                let m = n - 2;
-                let a = "0123456789";
-                let b = "abcdefghijklmnopqrstuvwxyz";
-                let r = "";
-                r += b[Math.floor(Math.random() * b.length)];
-                for (let i = 0; i < m; i++) {
-                    let i = Math.floor(Math.random() * (a.length + b.length));
-                    r += i < a.length ? a[i] : b[i - a.length];
-                }
-                r += b[Math.floor(Math.random() * b.length)];
-                return sumOfDigits(r) > 15 ? randomCaptcha(n) : r;
-            }
             return password.includes(p._.captcha);
         },
     },
@@ -245,9 +232,18 @@ class PasswordGame {
                 name: "captcha.png",
             });
             data.files = [attac];
+            let refreshcaptchabtn = new discord_js_1.ButtonBuilder()
+                .setCustomId("gamebtn_password_" + this.ctx.user.id + "_rc")
+                .setLabel("Refresh captcha?")
+                .setStyle(discord_js_1.ButtonStyle.Secondary);
+            data.components[1] = new discord_js_1.ActionRowBuilder().addComponents(refreshcaptchabtn);
         }
         else {
             data.files = [];
+            let l = data.components[1];
+            if (l &&
+                l.components[0].toJSON().custom_id.endsWith("_rc"))
+                data.components.pop();
         }
         return data;
     }
@@ -337,8 +333,24 @@ class PasswordGame {
         await this.message.edit(message);
     }
     async listenButton(interaction) {
+        let cid = interaction.customId;
+        if (cid.endsWith("_rc")) {
+            await this.refreshCaptcha(interaction);
+            return;
+        }
         let modal = this.makeModal();
         await interaction.showModal(modal).catch(this.noerr.bind(this));
+    }
+    async refreshCaptcha(interaction) {
+        await interaction.deferUpdate();
+        this._.captcha = randomCaptcha(5);
+        this._.captchaImage = await createCaptchaImage(this._.captcha);
+        let attac = new discord_js_1.AttachmentBuilder(this._.captchaImage, {
+            name: "captcha.png",
+        });
+        await this.message?.edit({
+            files: [attac],
+        });
     }
     noerr() {
         this.message?.reply("Something went wrong!");
@@ -448,5 +460,18 @@ function sumOfDigits(str) {
         }
     }
     return sum;
+}
+function randomCaptcha(n) {
+    let m = n - 2;
+    let a = "0123456789";
+    let b = "abcdefghijklmnopqrstuvwxyz";
+    let r = "";
+    r += b[Math.floor(Math.random() * b.length)];
+    for (let i = 0; i < m; i++) {
+        let i = Math.floor(Math.random() * (a.length + b.length));
+        r += i < a.length ? a[i] : b[i - a.length];
+    }
+    r += b[Math.floor(Math.random() * b.length)];
+    return sumOfDigits(r) > 15 ? randomCaptcha(n) : r;
 }
 //# sourceMappingURL=PasswordGame.js.map

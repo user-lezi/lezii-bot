@@ -10,6 +10,8 @@ import {
   ButtonStyle,
   ButtonInteraction,
   AttachmentBuilder,
+  ButtonBuilder,
+  APIButtonComponentWithCustomId,
 } from "discord.js";
 import { createCanvas } from "@napi-rs/canvas";
 export type RuleChecker = (
@@ -73,19 +75,6 @@ export const PasswordGameRules: Rule[] = [
     check: async function (password, p) {
       p!._.captcha ??= randomCaptcha(5) as string;
       p!._.captchaImage ??= await createCaptchaImage(p!._.captcha);
-      function randomCaptcha(n: number): number | string {
-        let m = n - 2;
-        let a = "0123456789";
-        let b = "abcdefghijklmnopqrstuvwxyz";
-        let r = "";
-        r += b[Math.floor(Math.random() * b.length)];
-        for (let i = 0; i < m; i++) {
-          let i = Math.floor(Math.random() * (a.length + b.length));
-          r += i < a.length ? a[i] : b[i - a.length];
-        }
-        r += b[Math.floor(Math.random() * b.length)];
-        return sumOfDigits(r) > 15 ? randomCaptcha(n) : r;
-      }
       return password.includes(p!._.captcha!);
     },
   },
@@ -278,8 +267,23 @@ export class PasswordGame {
         name: "captcha.png",
       });
       data.files = [attac];
+      let refreshcaptchabtn = new ButtonBuilder()
+        .setCustomId("gamebtn_password_" + this.ctx.user.id + "_rc")
+        .setLabel("Refresh captcha?")
+        .setStyle(ButtonStyle.Secondary);
+      data.components[1] = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        refreshcaptchabtn,
+      );
     } else {
       data.files = [];
+      let l = data.components[1] as ActionRowBuilder<ButtonBuilder> | undefined;
+      if (
+        l &&
+        (
+          l.components[0].toJSON() as APIButtonComponentWithCustomId
+        ).custom_id.endsWith("_rc")
+      )
+        data.components.pop();
     }
     return data;
   }
@@ -379,8 +383,25 @@ export class PasswordGame {
   }
 
   public async listenButton(interaction: ButtonInteraction) {
+    let cid = interaction.customId;
+    if (cid.endsWith("_rc")) {
+      await this.refreshCaptcha(interaction);
+      return;
+    }
     let modal = this.makeModal();
     await interaction.showModal(modal).catch(this.noerr.bind(this));
+  }
+
+  public async refreshCaptcha(interaction: ButtonInteraction) {
+    await interaction.deferUpdate();
+    this._.captcha = randomCaptcha(5) as string;
+    this._.captchaImage = await createCaptchaImage(this._.captcha);
+    let attac = new AttachmentBuilder(this._.captchaImage!, {
+      name: "captcha.png",
+    });
+    await this.message?.edit({
+      files: [attac],
+    });
   }
 
   public noerr() {
@@ -400,7 +421,7 @@ async function getWordleAnswer(p: PasswordGame) {
           if (msg.deletable) {
             msg.delete().catch(() => {});
           }
-        }, 10 * 1000);
+        }, 30 * 1000);
       })
       .catch(() => {});
   let api = `https://www.nytimes.com/svc/wordle/v2/YYYY-MM-DD.json`;
@@ -505,4 +526,18 @@ function sumOfDigits(str: string) {
     }
   }
   return sum;
+}
+
+function randomCaptcha(n: number): number | string {
+  let m = n - 2;
+  let a = "0123456789";
+  let b = "abcdefghijklmnopqrstuvwxyz";
+  let r = "";
+  r += b[Math.floor(Math.random() * b.length)];
+  for (let i = 0; i < m; i++) {
+    let i = Math.floor(Math.random() * (a.length + b.length));
+    r += i < a.length ? a[i] : b[i - a.length];
+  }
+  r += b[Math.floor(Math.random() * b.length)];
+  return sumOfDigits(r) > 18 ? randomCaptcha(n) : r;
 }

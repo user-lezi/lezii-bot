@@ -35,6 +35,7 @@ export declare class PasswordGame {
     start(): Promise<void>;
     listenModal(interaction: ModalSubmitInteraction): Promise<void>;
     listenButton(interaction: ButtonInteraction): Promise<void>;
+    refreshCaptcha(interaction: ButtonInteraction): Promise<void>;
     noerr(): boolean;
 }
 //# sourceMappingURL=PasswordGame.d.ts.map
