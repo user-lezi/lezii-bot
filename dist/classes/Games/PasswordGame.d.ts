@@ -1,5 +1,5 @@
 import { SlashContext } from "../../commands/context";
-import { EmbedBuilder, ModalBuilder, Message, ModalSubmitInteraction, ButtonInteraction } from "discord.js";
+import { EmbedBuilder, ModalBuilder, Message, ModalSubmitInteraction, ButtonInteraction, Collection } from "discord.js";
 export type RuleChecker = (password: string, p?: PasswordGame) => Promise<boolean>;
 export interface Rule {
     id: string;
@@ -20,6 +20,7 @@ export declare class PasswordGame {
         captcha: string | null;
         captchaImage: Buffer | null;
         hadfire: boolean;
+        tips: Collection<string, boolean>;
     };
     message: Message | null;
     constructor(ctx: SlashContext);
@@ -36,6 +37,7 @@ export declare class PasswordGame {
     listenModal(interaction: ModalSubmitInteraction): Promise<void>;
     listenButton(interaction: ButtonInteraction): Promise<void>;
     refreshCaptcha(interaction: ButtonInteraction): Promise<void>;
+    sendTip(tipid: string, message: string, timeout?: number): Promise<void> | undefined;
     noerr(): boolean;
 }
 //# sourceMappingURL=PasswordGame.d.ts.map

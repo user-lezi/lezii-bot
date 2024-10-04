@@ -12,6 +12,7 @@ import {
   AttachmentBuilder,
   ButtonBuilder,
   APIButtonComponentWithCustomId,
+  Collection,
 } from "discord.js";
 import { createCanvas } from "@napi-rs/canvas";
 export type RuleChecker = (
@@ -109,6 +110,28 @@ export const PasswordGameRules: Rule[] = [
     },
   },
   {
+    id: "strong",
+    rule: "Your password must be strong enough.",
+    simple: true,
+    check: async function (password, p) {
+      let emo = "🏋️";
+      let req = 3;
+      let count = password.split(emo).length - 1;
+      let r = count == req;
+      if (!r && !p?._.tips.get("strongPassword"))
+        p?.sendTip(
+          "strongPassword",
+          count == 0
+            ? `Add ${emo} to make your password stronger.`
+            : count < req
+              ? `Password needs to be more stronger!!`
+              : `Its too strong!! Try making it little weaker.`,
+          10 * 1000,
+        );
+      return r;
+    },
+  },
+  {
     id: "fire",
     rule: "Oh no! The password is on fire!!!",
     simple: false,
@@ -175,11 +198,13 @@ export class PasswordGame {
     captcha: null,
     captchaImage: null,
     hadfire: false,
+    tips: new Collection<string, boolean>(),
   } as {
     wordleAnswer: string | null;
     captcha: string | null;
     captchaImage: Buffer | null;
     hadfire: boolean;
+    tips: Collection<string, boolean>;
   };
   public message: Message | null = null;
   constructor(public ctx: SlashContext) {
@@ -404,6 +429,19 @@ export class PasswordGame {
     });
   }
 
+  public sendTip(tipid: string, message: string, timeout?: number) {
+    if (this._.tips.get(tipid)) return;
+    return this.message
+      ?.reply(message)
+      .then((x) => {
+        if (timeout) this._.tips.set(tipid, true);
+        setTimeout(async () => {
+          if (x.deletable) x.delete().catch(() => {});
+          this._.tips.set(tipid, false);
+        }, timeout);
+      })
+      .catch(() => {});
+  }
   public noerr() {
     this.message?.reply("Something went wrong!");
     return this.ctx.client.cache.games.password.delete(this.ctx.user.id);

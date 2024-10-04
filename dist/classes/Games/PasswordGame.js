@@ -88,6 +88,24 @@ exports.PasswordGameRules = [
         },
     },
     {
+        id: "strong",
+        rule: "Your password must be strong enough.",
+        simple: true,
+        check: async function (password, p) {
+            let emo = "🏋️";
+            let req = 3;
+            let count = password.split(emo).length - 1;
+            let r = count == req;
+            if (!r && !p?._.tips.get("strongPassword"))
+                p?.sendTip("strongPassword", count == 0
+                    ? `Add ${emo} to make your password stronger.`
+                    : count < req
+                        ? `Password needs to be more stronger!!`
+                        : `Its too strong!! Try making it little weaker.`, 10 * 1000);
+            return r;
+        },
+    },
+    {
         id: "fire",
         rule: "Oh no! The password is on fire!!!",
         simple: false,
@@ -154,6 +172,7 @@ class PasswordGame {
         captcha: null,
         captchaImage: null,
         hadfire: false,
+        tips: new discord_js_1.Collection(),
     };
     message = null;
     constructor(ctx) {
@@ -352,6 +371,22 @@ class PasswordGame {
             files: [attac],
         });
     }
+    sendTip(tipid, message, timeout) {
+        if (this._.tips.get(tipid))
+            return;
+        return this.message
+            ?.reply(message)
+            .then((x) => {
+            if (timeout)
+                this._.tips.set(tipid, true);
+            setTimeout(async () => {
+                if (x.deletable)
+                    x.delete().catch(() => { });
+                this._.tips.set(tipid, false);
+            }, timeout);
+        })
+            .catch(() => { });
+    }
     noerr() {
         this.message?.reply("Something went wrong!");
         return this.ctx.client.cache.games.password.delete(this.ctx.user.id);
@@ -369,7 +404,7 @@ async function getWordleAnswer(p) {
                 if (msg.deletable) {
                     msg.delete().catch(() => { });
                 }
-            }, 10 * 1000);
+            }, 30 * 1000);
         })
             .catch(() => { });
     let api = `https://www.nytimes.com/svc/wordle/v2/YYYY-MM-DD.json`;
@@ -472,6 +507,6 @@ function randomCaptcha(n) {
         r += i < a.length ? a[i] : b[i - a.length];
     }
     r += b[Math.floor(Math.random() * b.length)];
-    return sumOfDigits(r) > 15 ? randomCaptcha(n) : r;
+    return sumOfDigits(r) > 18 ? randomCaptcha(n) : r;
 }
 //# sourceMappingURL=PasswordGame.js.map
