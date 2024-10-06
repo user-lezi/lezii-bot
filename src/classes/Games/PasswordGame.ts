@@ -641,15 +641,12 @@ function isPrime(num: number): boolean {
 }
 
 function getElements(s: string) {
-  let t = "";
   let e: ICE[] = [];
-  for (let i = 0; i < s.length; i++) {
-    t += s[i];
-    if (ChemicalElements.has(t)) {
-      e.push(ChemicalElements.get(t)!);
-      t = "";
-    }
+  for (let i = 0; i < s.length - 1; i++) {
+    let j = i + 1;
+    let t = s[i] + s[j];
+    let el = ChemicalElements.get(t);
+    if (el) e.push(el);
   }
-  if (ChemicalElements.has(t)) e.push(ChemicalElements.get(t)!);
   return e;
 }
