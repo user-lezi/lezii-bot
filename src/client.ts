@@ -4,6 +4,8 @@ import {
   GuildTextBasedChannel,
   EmbedBuilder,
   Collection,
+  ActivityType,
+  User,
 } from "discord.js";
 import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
@@ -69,6 +71,33 @@ export class Client extends _Client<true> {
         ],
       };
       channel?.send(message);
+
+      const CustomStatuses = [
+        async () => `${this.guilds.cache.size} Guilds FR`,
+        async () =>
+          `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
+        async () => `Touch some grass`,
+        async () =>
+          `Try out /${this.application.commands.cache.random()!.name}`,
+        async () => {
+          let a = this.randomUser();
+          let r = ["hello {}", "{} needs to touch some grass."];
+          return a
+            ? r[Math.floor(Math.random() * r.length)].replace(
+                "{}",
+                `@${a.username}`,
+              )
+            : `uwu`;
+        },
+      ] as Array<(this: Client) => Promise<string>>;
+
+      setInterval(async () => {
+        let randomIndex = Math.floor(Math.random() * CustomStatuses.length);
+        let status = CustomStatuses[randomIndex].bind(this);
+        this.user.setActivity(await status(), {
+          type: ActivityType.Custom,
+        });
+      }, 30 * 1000);
     });
 
     this.on("interactionCreate", async (interaction) => {
@@ -121,5 +150,14 @@ export class Client extends _Client<true> {
 
   login() {
     return super.login(process.env.BotToken!);
+  }
+
+  randomUser(noBot = true): User | null {
+    try {
+      let found = this.users.cache.random();
+      return found ? (found.bot && noBot ? this.randomUser() : found) : null;
+    } catch {
+      return null;
+    }
   }
 }

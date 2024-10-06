@@ -50,6 +50,26 @@ class Client extends discord_js_1.Client {
                 ],
             };
             channel?.send(message);
+            const CustomStatuses = [
+                async () => `${this.guilds.cache.size} Guilds FR`,
+                async () => `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
+                async () => `Touch some grass`,
+                async () => `Try out /${this.application.commands.cache.random().name}`,
+                async () => {
+                    let a = this.randomUser();
+                    let r = ["hello {}", "{} needs to touch some grass."];
+                    return a
+                        ? r[Math.floor(Math.random() * r.length)].replace("{}", `@${a.username}`)
+                        : `uwu`;
+                },
+            ];
+            setInterval(async () => {
+                let randomIndex = Math.floor(Math.random() * CustomStatuses.length);
+                let status = CustomStatuses[randomIndex].bind(this);
+                this.user.setActivity(await status(), {
+                    type: discord_js_1.ActivityType.Custom,
+                });
+            }, 30 * 1000);
         });
         this.on("interactionCreate", async (interaction) => {
             if (interaction.isModalSubmit()) {
@@ -102,6 +122,15 @@ class Client extends discord_js_1.Client {
     }
     login() {
         return super.login(process.env.BotToken);
+    }
+    randomUser(noBot = true) {
+        try {
+            let found = this.users.cache.random();
+            return found ? (found.bot && noBot ? this.randomUser() : found) : null;
+        }
+        catch {
+            return null;
+        }
     }
 }
 exports.Client = Client;

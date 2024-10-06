@@ -1,4 +1,4 @@
-import { Client as _Client, UserResolvable, Collection } from "discord.js";
+import { Client as _Client, UserResolvable, Collection, User } from "discord.js";
 import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
 import { PasswordGame } from "./classes/Games";
@@ -22,5 +22,6 @@ export declare class Client extends _Client<true> {
     constructor();
     isDev(user: UserResolvable): boolean;
     login(): Promise<string>;
+    randomUser(noBot?: boolean): User | null;
 }
 //# sourceMappingURL=client.d.ts.map
