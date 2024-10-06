@@ -1,9 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PasswordGame = exports.PasswordGameRules = void 0;
+exports.PasswordGame = exports.PasswordGameRules = exports.TwoLetterElements = void 0;
 exports.getRule = getRule;
 const discord_js_1 = require("discord.js");
 const canvas_1 = require("@napi-rs/canvas");
+const elements_json_1 = __importDefault(require("../../../json/elements.json"));
+const ChemicalElements = new discord_js_1.Collection();
+elements_json_1.default.forEach((x) => ChemicalElements.set(x[1], x));
+exports.TwoLetterElements = Array.from(ChemicalElements.filter((x) => x[1].length == 2).keys());
 exports.PasswordGameRules = [
     {
         id: "length",
@@ -80,6 +87,18 @@ exports.PasswordGameRules = [
         },
     },
     {
+        id: "twoLetterElements",
+        rule: "Your password must include a two letter symbol from the periodic table",
+        simple: true,
+        check: async function (password) {
+            for (const ele of exports.TwoLetterElements) {
+                if (password.includes(ele))
+                    return true;
+            }
+            return false;
+        },
+    },
+    {
         id: "pi",
         rule: "Keep this pi (π) safely in your password.",
         simple: true,
@@ -147,12 +166,29 @@ exports.PasswordGameRules = [
         },
     },
     {
+        id: "sumAtomicNumber",
+        rule: "The elements in your password must have the sum of their atomic number equal to 200.",
+        simple: true,
+        check: async function (password) {
+            let elements = getElements(password);
+            return elements.reduce((a, b) => a + b[2], 0) == 200;
+        },
+    },
+    {
         id: "plength",
         rule: "The password must include the length of the password.",
         simple: true,
         check: async function (password) {
             let length = password.length;
             return password.includes(length.toString());
+        },
+    },
+    {
+        id: "primelength",
+        rule: "The length of the password must be a prime number",
+        simple: true,
+        check: async function (password) {
+            return isPrime(password.length);
         },
     },
 ];
@@ -200,11 +236,14 @@ class PasswordGame {
         }
         return rules.flat().join("\n").trim();
     }
-    async makeEmbed() {
+    async makeEmbed(includelength = true) {
+        let ps = `> ${this.password ?? "*Enter your password*"}`;
         let embed_1 = this.ctx.util
             .embed()
             .setTitle("Password Game")
-            .setDescription(`> ${this.password ?? "*Enter your password*"}`);
+            .setDescription(includelength
+            ? this.ctx.join(ps, `> -# (${this.password.length} chars)`)
+            : ps);
         let embed_2 = this.ctx.util
             .embed()
             .setTitle("Rules")
@@ -293,7 +332,7 @@ class PasswordGame {
         await this.ctx.interaction.showModal(modal).catch(this.noerr.bind(this));
         try {
             let am = await this.ctx.interaction.awaitModalSubmit({
-                time: 30 * 1000,
+                time: 60 * 1000,
                 filter: (i) => i.user.id == this.ctx.user.id &&
                     i.customId == "game_password_" + this.ctx.user.id,
             });
@@ -331,7 +370,7 @@ class PasswordGame {
             this.ruleN++;
         if (this.rulesCompleted()) {
             this.ruleN--;
-            let embeds = await this.makeEmbed();
+            let embeds = await this.makeEmbed(false);
             embeds[1].setTitle("You Won!!");
             embeds[0].addFields({
                 name: "Password Length",
@@ -361,15 +400,18 @@ class PasswordGame {
         await interaction.showModal(modal).catch(this.noerr.bind(this));
     }
     async refreshCaptcha(interaction) {
-        await interaction.deferUpdate();
-        this._.captcha = randomCaptcha(5);
-        this._.captchaImage = await createCaptchaImage(this._.captcha);
-        let attac = new discord_js_1.AttachmentBuilder(this._.captchaImage, {
-            name: "captcha.png",
-        });
-        await this.message?.edit({
-            files: [attac],
-        });
+        try {
+            await interaction.deferUpdate();
+            this._.captcha = randomCaptcha(5);
+            this._.captchaImage = await createCaptchaImage(this._.captcha);
+            let attac = new discord_js_1.AttachmentBuilder(this._.captchaImage, {
+                name: "captcha.png",
+            });
+            await this.message?.edit({
+                files: [attac],
+            });
+        }
+        catch { }
     }
     sendTip(tipid, message, timeout) {
         if (this._.tips.get(tipid))
@@ -377,13 +419,14 @@ class PasswordGame {
         return this.message
             ?.reply(message)
             .then((x) => {
-            if (timeout)
+            if (timeout) {
                 this._.tips.set(tipid, true);
-            setTimeout(async () => {
-                if (x.deletable)
-                    x.delete().catch(() => { });
-                this._.tips.set(tipid, false);
-            }, timeout);
+                setTimeout(async () => {
+                    if (x.deletable)
+                        x.delete().catch(() => { });
+                    this._.tips.set(tipid, false);
+                }, timeout);
+            }
         })
             .catch(() => { });
     }
@@ -508,5 +551,30 @@ function randomCaptcha(n) {
     }
     r += b[Math.floor(Math.random() * b.length)];
     return sumOfDigits(r) > 18 ? randomCaptcha(n) : r;
+}
+function isPrime(num) {
+    if (num <= 1) {
+        return false;
+    }
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+        if (num % i === 0) {
+            return false;
+        }
+    }
+    return true;
+}
+function getElements(s) {
+    let t = "";
+    let e = [];
+    for (let i = 0; i < s.length; i++) {
+        t += s[i];
+        if (ChemicalElements.has(t)) {
+            e.push(ChemicalElements.get(t));
+            t = "";
+        }
+    }
+    if (ChemicalElements.has(t))
+        e.push(ChemicalElements.get(t));
+    return e;
 }
 //# sourceMappingURL=PasswordGame.js.map

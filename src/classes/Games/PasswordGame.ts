@@ -1,4 +1,5 @@
 import { SlashContext } from "../../commands/context";
+
 import {
   EmbedBuilder,
   ModalBuilder,
@@ -26,6 +27,14 @@ export interface Rule {
   simple: boolean;
   check: RuleChecker;
 }
+
+import _ChemicalElements from "../../../json/elements.json";
+export type ICE = [string, string, number, number, string];
+const ChemicalElements = new Collection<string, ICE>();
+(_ChemicalElements as ICE[]).forEach((x) => ChemicalElements.set(x[1], x));
+export const TwoLetterElements = Array.from(
+  ChemicalElements.filter((x) => x[1].length == 2).keys(),
+);
 
 export const PasswordGameRules: Rule[] = [
   {
@@ -102,6 +111,17 @@ export const PasswordGameRules: Rule[] = [
     },
   },
   {
+    id: "twoLetterElements",
+    rule: "Your password must include a two letter symbol from the periodic table",
+    simple: true,
+    check: async function (password) {
+      for (const ele of TwoLetterElements) {
+        if (password.includes(ele)) return true;
+      }
+      return false;
+    },
+  },
+  {
     id: "pi",
     rule: "Keep this pi (π) safely in your password.",
     simple: true,
@@ -173,12 +193,29 @@ export const PasswordGameRules: Rule[] = [
     },
   },
   {
+    id: "sumAtomicNumber",
+    rule: "The elements in your password must have the sum of their atomic number equal to 200.",
+    simple: true,
+    check: async function (password) {
+      let elements: ICE[] = getElements(password);
+      return elements.reduce((a, b) => a + b[2], 0) == 200;
+    },
+  },
+  {
     id: "plength",
     rule: "The password must include the length of the password.",
     simple: true,
     check: async function (password) {
       let length = password.length;
       return password.includes(length.toString());
+    },
+  },
+  {
+    id: "primelength",
+    rule: "The length of the password must be a prime number",
+    simple: true,
+    check: async function (password) {
+      return isPrime(password.length);
     },
   },
 ];
@@ -235,11 +272,16 @@ export class PasswordGame {
     return rules.flat().join("\n").trim();
   }
 
-  public async makeEmbed() {
+  public async makeEmbed(includelength = true) {
+    let ps = `> ${this.password ?? "*Enter your password*"}`;
     let embed_1 = this.ctx.util
       .embed()
       .setTitle("Password Game")
-      .setDescription(`> ${this.password ?? "*Enter your password*"}`);
+      .setDescription(
+        includelength
+          ? this.ctx.join(ps, `> -# (${this.password.length} chars)`)
+          : ps,
+      );
     let embed_2 = this.ctx.util
       .embed()
       .setTitle("Rules")
@@ -342,7 +384,7 @@ export class PasswordGame {
 
     try {
       let am = await this.ctx.interaction.awaitModalSubmit({
-        time: 30 * 1000,
+        time: 60 * 1000,
         filter: (i) =>
           i.user.id == this.ctx.user.id &&
           i.customId == "game_password_" + this.ctx.user.id,
@@ -383,7 +425,7 @@ export class PasswordGame {
     if (passed) this.ruleN++;
     if (this.rulesCompleted()) {
       this.ruleN--;
-      let embeds = await this.makeEmbed();
+      let embeds = await this.makeEmbed(false);
       embeds[1].setTitle("You Won!!");
       embeds[0].addFields(
         {
@@ -418,15 +460,17 @@ export class PasswordGame {
   }
 
   public async refreshCaptcha(interaction: ButtonInteraction) {
-    await interaction.deferUpdate();
-    this._.captcha = randomCaptcha(5) as string;
-    this._.captchaImage = await createCaptchaImage(this._.captcha);
-    let attac = new AttachmentBuilder(this._.captchaImage!, {
-      name: "captcha.png",
-    });
-    await this.message?.edit({
-      files: [attac],
-    });
+    try {
+      await interaction.deferUpdate();
+      this._.captcha = randomCaptcha(5) as string;
+      this._.captchaImage = await createCaptchaImage(this._.captcha);
+      let attac = new AttachmentBuilder(this._.captchaImage!, {
+        name: "captcha.png",
+      });
+      await this.message?.edit({
+        files: [attac],
+      });
+    } catch {}
   }
 
   public sendTip(tipid: string, message: string, timeout?: number) {
@@ -434,11 +478,13 @@ export class PasswordGame {
     return this.message
       ?.reply(message)
       .then((x) => {
-        if (timeout) this._.tips.set(tipid, true);
-        setTimeout(async () => {
-          if (x.deletable) x.delete().catch(() => {});
-          this._.tips.set(tipid, false);
-        }, timeout);
+        if (timeout) {
+          this._.tips.set(tipid, true);
+          setTimeout(async () => {
+            if (x.deletable) x.delete().catch(() => {});
+            this._.tips.set(tipid, false);
+          }, timeout);
+        }
       })
       .catch(() => {});
   }
@@ -578,4 +624,32 @@ function randomCaptcha(n: number): number | string {
   }
   r += b[Math.floor(Math.random() * b.length)];
   return sumOfDigits(r) > 18 ? randomCaptcha(n) : r;
+}
+
+function isPrime(num: number): boolean {
+  if (num <= 1) {
+    return false;
+  }
+
+  for (let i = 2; i <= Math.sqrt(num); i++) {
+    if (num % i === 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getElements(s: string) {
+  let t = "";
+  let e: ICE[] = [];
+  for (let i = 0; i < s.length; i++) {
+    t += s[i];
+    if (ChemicalElements.has(t)) {
+      e.push(ChemicalElements.get(t)!);
+      t = "";
+    }
+  }
+  if (ChemicalElements.has(t)) e.push(ChemicalElements.get(t)!);
+  return e;
 }

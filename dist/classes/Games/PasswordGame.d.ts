@@ -7,6 +7,8 @@ export interface Rule {
     simple: boolean;
     check: RuleChecker;
 }
+export type ICE = [string, string, number, number, string];
+export declare const TwoLetterElements: string[];
 export declare const PasswordGameRules: Rule[];
 export declare function getRule(q: number | string): Rule | undefined;
 export declare class PasswordGame {
@@ -27,7 +29,7 @@ export declare class PasswordGame {
     passedAllRules(): Promise<boolean>;
     rulesCompleted(): boolean;
     getRulesString(): Promise<string>;
-    makeEmbed(): Promise<EmbedBuilder[]>;
+    makeEmbed(includelength?: boolean): Promise<EmbedBuilder[]>;
     makeModal(): ModalBuilder;
     makeMessage(): Promise<any>;
     showCaptcha(): Promise<boolean>;
