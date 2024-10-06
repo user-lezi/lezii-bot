@@ -19,9 +19,11 @@ export declare class Client extends _Client<true> {
     };
     commands: CommandManager;
     util: ClientUtils;
+    customStatuses: Array<(this: Client) => Promise<string>>;
     constructor();
     isDev(user: UserResolvable): boolean;
     login(): Promise<string>;
     randomUser(noBot?: boolean): User | null;
+    randomStatus(): Promise<void>;
 }
 //# sourceMappingURL=client.d.ts.map

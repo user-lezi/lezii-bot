@@ -25,11 +25,29 @@ class Client extends discord_js_1.Client {
     };
     commands = new commands_1.CommandManager(this);
     util = new ClientUtils_1.ClientUtils(this);
+    customStatuses;
     constructor() {
         super({
             intents: ["Guilds", "GuildMessages", "MessageContent"],
         });
         this.commands.load();
+        this.customStatuses = [
+            async () => `${this.guilds.cache.size} Guilds FR`,
+            async () => `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
+            async () => `Touch some grass`,
+            async () => `Try out /${this.application.commands.cache.random().name}`,
+            async () => {
+                let a = this.randomUser();
+                let r = ["hello {}", "{} needs to touch some grass."];
+                return a
+                    ? r[Math.floor(Math.random() * r.length)].replace("{}", `@${a.username}`)
+                    : `uwu`;
+            },
+            async () => {
+                let total = this.customStatuses.length;
+                return `The probability of showing up this text is 1/${total} (~${(100 / total).toFixed(2)}%)`;
+            },
+        ];
         this.on("ready", () => {
             this.commands
                 .registerSlashCommands()
@@ -50,26 +68,7 @@ class Client extends discord_js_1.Client {
                 ],
             };
             channel?.send(message);
-            const CustomStatuses = [
-                async () => `${this.guilds.cache.size} Guilds FR`,
-                async () => `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
-                async () => `Touch some grass`,
-                async () => `Try out /${this.application.commands.cache.random().name}`,
-                async () => {
-                    let a = this.randomUser();
-                    let r = ["hello {}", "{} needs to touch some grass."];
-                    return a
-                        ? r[Math.floor(Math.random() * r.length)].replace("{}", `@${a.username}`)
-                        : `uwu`;
-                },
-            ];
-            setInterval(async () => {
-                let randomIndex = Math.floor(Math.random() * CustomStatuses.length);
-                let status = CustomStatuses[randomIndex].bind(this);
-                this.user.setActivity(await status(), {
-                    type: discord_js_1.ActivityType.Custom,
-                });
-            }, 30 * 1000);
+            setInterval(this.randomStatus.bind(this), 30 * 1000);
         });
         this.on("interactionCreate", async (interaction) => {
             if (interaction.isModalSubmit()) {
@@ -131,6 +130,13 @@ class Client extends discord_js_1.Client {
         catch {
             return null;
         }
+    }
+    async randomStatus() {
+        let randomIndex = Math.floor(Math.random() * this.customStatuses.length);
+        let status = this.customStatuses[randomIndex].bind(this);
+        this.user.setActivity(await status(), {
+            type: discord_js_1.ActivityType.Custom,
+        });
     }
 }
 exports.Client = Client;

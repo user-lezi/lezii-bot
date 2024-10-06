@@ -30,11 +30,33 @@ export class Client extends _Client<true> {
   };
   public commands = new CommandManager(this);
   public util = new ClientUtils(this);
+  public customStatuses: Array<(this: Client) => Promise<string>>;
   constructor() {
     super({
       intents: ["Guilds", "GuildMessages", "MessageContent"],
     });
     this.commands.load();
+    this.customStatuses = [
+      async () => `${this.guilds.cache.size} Guilds FR`,
+      async () =>
+        `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
+      async () => `Touch some grass`,
+      async () => `Try out /${this.application.commands.cache.random()!.name}`,
+      async () => {
+        let a = this.randomUser();
+        let r = ["hello {}", "{} needs to touch some grass."];
+        return a
+          ? r[Math.floor(Math.random() * r.length)].replace(
+              "{}",
+              `@${a.username}`,
+            )
+          : `uwu`;
+      },
+      async () => {
+        let total = this.customStatuses.length;
+        return `The probability of showing up this text is 1/${total} (~${(100 / total).toFixed(2)}%)`;
+      },
+    ];
 
     this.on("ready", () => {
       this.commands
@@ -72,32 +94,7 @@ export class Client extends _Client<true> {
       };
       channel?.send(message);
 
-      const CustomStatuses = [
-        async () => `${this.guilds.cache.size} Guilds FR`,
-        async () =>
-          `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
-        async () => `Touch some grass`,
-        async () =>
-          `Try out /${this.application.commands.cache.random()!.name}`,
-        async () => {
-          let a = this.randomUser();
-          let r = ["hello {}", "{} needs to touch some grass."];
-          return a
-            ? r[Math.floor(Math.random() * r.length)].replace(
-                "{}",
-                `@${a.username}`,
-              )
-            : `uwu`;
-        },
-      ] as Array<(this: Client) => Promise<string>>;
-
-      setInterval(async () => {
-        let randomIndex = Math.floor(Math.random() * CustomStatuses.length);
-        let status = CustomStatuses[randomIndex].bind(this);
-        this.user.setActivity(await status(), {
-          type: ActivityType.Custom,
-        });
-      }, 30 * 1000);
+      setInterval(this.randomStatus.bind(this), 30 * 1000);
     });
 
     this.on("interactionCreate", async (interaction) => {
@@ -159,5 +156,13 @@ export class Client extends _Client<true> {
     } catch {
       return null;
     }
+  }
+
+  async randomStatus() {
+    let randomIndex = Math.floor(Math.random() * this.customStatuses.length);
+    let status = this.customStatuses[randomIndex].bind(this);
+    this.user.setActivity(await status(), {
+      type: ActivityType.Custom,
+    });
   }
 }
