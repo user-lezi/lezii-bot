@@ -68,6 +68,7 @@ class Client extends discord_js_1.Client {
                 ],
             };
             channel?.send(message);
+            this.randomStatus();
             setInterval(this.randomStatus.bind(this), 30 * 1000);
         });
         this.on("interactionCreate", async (interaction) => {

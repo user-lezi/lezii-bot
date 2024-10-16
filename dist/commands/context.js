@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SlashContext = void 0;
+const discord_js_1 = require("discord.js");
 class SlashContext {
     client;
     interaction;
@@ -26,6 +27,9 @@ class SlashContext {
     get util() {
         return this.client.util;
     }
+    defer() {
+        return this.interaction.deferReply().catch(() => null);
+    }
     reply(message) {
         return this.interaction.deferred || this.interaction.replied
             ? this.interaction.editReply(message)
@@ -36,6 +40,16 @@ class SlashContext {
     }
     sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+    userLink(user) {
+        let id = user instanceof discord_js_1.GuildMember || user instanceof discord_js_1.ThreadMember
+            ? user.user.id
+            : user instanceof discord_js_1.Message
+                ? user.author.id
+                : user instanceof discord_js_1.User
+                    ? user.id
+                    : user;
+        return `https://discord.com/users/${id}`;
     }
 }
 exports.SlashContext = SlashContext;

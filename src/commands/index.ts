@@ -5,6 +5,7 @@ import {
   SlashCommandSubcommandsOnlyBuilder,
   Routes,
   SlashCommandOptionsOnlyBuilder,
+  CommandInteraction,
 } from "discord.js";
 import chalk from "chalk";
 import { readdirSync, statSync } from "fs";
@@ -90,25 +91,29 @@ export class CommandManager {
   }
   private addSlashListener() {
     this.client.on(Events.InteractionCreate, async (interaction) => {
-      if (!interaction.isChatInputCommand()) return;
-      let command = this.commands.get(interaction.commandName);
-      if (!command) return;
-      let exe = command.execute;
-      let ctx = new SlashContext(this.client, interaction);
-      if (command.defer) {
-        await ctx.interaction.deferReply();
-      }
-      if (typeof exe == "function") {
-        /* Not sub slash command */
-        exe(ctx);
-      } else {
-        /* Sub slash command */
-        let sub = (exe as SlashCommand<true>["execute"])[
-          interaction.options.getSubcommand(true)
-        ];
-        if (typeof sub == "function") {
-          sub(ctx);
+      try {
+        if (!interaction.isChatInputCommand()) return;
+        let command = this.commands.get(interaction.commandName);
+        if (!command) return;
+        let exe = command.execute;
+        let ctx = new SlashContext(this.client, interaction);
+        if (command.defer) {
+          await ctx.interaction.deferReply().catch(() => {});
         }
+        if (typeof exe == "function") {
+          /* Not sub slash command */
+          exe(ctx);
+        } else {
+          /* Sub slash command */
+          let sub = (exe as SlashCommand<true>["execute"])[
+            interaction.options.getSubcommand(true)
+          ];
+          if (typeof sub == "function") {
+            sub(ctx);
+          }
+        }
+      } catch (e: any) {
+        (interaction as CommandInteraction).reply("Something went wrong!!");
       }
     });
     console.log(chalk.blueBright(`Added slash listener!`));

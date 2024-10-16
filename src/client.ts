@@ -94,6 +94,7 @@ export class Client extends _Client<true> {
       };
       channel?.send(message);
 
+      this.randomStatus();
       setInterval(this.randomStatus.bind(this), 30 * 1000);
     });
 

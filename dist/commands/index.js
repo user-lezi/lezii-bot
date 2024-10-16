@@ -61,26 +61,31 @@ class CommandManager {
     }
     addSlashListener() {
         this.client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
-            if (!interaction.isChatInputCommand())
-                return;
-            let command = this.commands.get(interaction.commandName);
-            if (!command)
-                return;
-            let exe = command.execute;
-            let ctx = new context_1.SlashContext(this.client, interaction);
-            if (command.defer) {
-                await ctx.interaction.deferReply();
-            }
-            if (typeof exe == "function") {
-                /* Not sub slash command */
-                exe(ctx);
-            }
-            else {
-                /* Sub slash command */
-                let sub = exe[interaction.options.getSubcommand(true)];
-                if (typeof sub == "function") {
-                    sub(ctx);
+            try {
+                if (!interaction.isChatInputCommand())
+                    return;
+                let command = this.commands.get(interaction.commandName);
+                if (!command)
+                    return;
+                let exe = command.execute;
+                let ctx = new context_1.SlashContext(this.client, interaction);
+                if (command.defer) {
+                    await ctx.interaction.deferReply().catch(() => { });
                 }
+                if (typeof exe == "function") {
+                    /* Not sub slash command */
+                    exe(ctx);
+                }
+                else {
+                    /* Sub slash command */
+                    let sub = exe[interaction.options.getSubcommand(true)];
+                    if (typeof sub == "function") {
+                        sub(ctx);
+                    }
+                }
+            }
+            catch (e) {
+                interaction.reply("Something went wrong!!");
             }
         });
         console.log(chalk_1.default.blueBright(`Added slash listener!`));

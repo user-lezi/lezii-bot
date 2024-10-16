@@ -74,4 +74,12 @@ export class ClientUtils {
   public embed() {
     return new EmbedBuilder().setColor(this.client._.color.main);
   }
+
+  public shuffleArr<T>(arr: T[], n = 2): T[] {
+    for (let i = 0; i < arr.length; i++) {
+      let j = Math.floor(Math.random() * arr.length);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return n > 1 ? this.shuffleArr(arr, n - 1) : arr;
+  }
 }

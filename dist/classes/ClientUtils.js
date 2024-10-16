@@ -60,6 +60,13 @@ class ClientUtils {
     embed() {
         return new discord_js_1.EmbedBuilder().setColor(this.client._.color.main);
     }
+    shuffleArr(arr, n = 2) {
+        for (let i = 0; i < arr.length; i++) {
+            let j = Math.floor(Math.random() * arr.length);
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return n > 1 ? this.shuffleArr(arr, n - 1) : arr;
+    }
 }
 exports.ClientUtils = ClientUtils;
 //# sourceMappingURL=ClientUtils.js.map

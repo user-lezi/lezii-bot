@@ -1,4 +1,12 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  GuildMember,
+  Message,
+  ThreadMember,
+  User,
+  UserResolvable,
+} from "discord.js";
 import { type Client } from "../client";
 
 export class SlashContext {
@@ -26,6 +34,9 @@ export class SlashContext {
     return this.client.util;
   }
 
+  public defer() {
+    return this.interaction.deferReply().catch(() => null);
+  }
   public reply(message: any) {
     return this.interaction.deferred || this.interaction.replied
       ? this.interaction.editReply(message)
@@ -38,5 +49,17 @@ export class SlashContext {
 
   public sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  public userLink(user: UserResolvable) {
+    let id =
+      user instanceof GuildMember || user instanceof ThreadMember
+        ? user.user!.id
+        : user instanceof Message
+          ? user.author.id
+          : user instanceof User
+            ? user.id
+            : user;
+    return `https://discord.com/users/${id}` as const;
   }
 }

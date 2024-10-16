@@ -15,5 +15,6 @@ export declare class ClientUtils {
     parseMS(ms: number): string;
     roundN(n: number, decimals?: number): number;
     embed(): EmbedBuilder;
+    shuffleArr<T>(arr: T[], n?: number): T[];
 }
 //# sourceMappingURL=ClientUtils.d.ts.map

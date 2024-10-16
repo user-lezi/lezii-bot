@@ -48,7 +48,7 @@ export default {
       name: "Information",
       value: ctx.join(
         `Uptime: ${bold(ctx.util.parseMS(ctx.client.uptime))}`,
-        `Developer: ${bold(fetchedDevs.map((x) => hyperlink(`@${x.username}`, `https://discord.com/users/${x.id}`)).join(" | "))}`,
+        `Developer: ${bold(fetchedDevs.map((x) => ctx.userLink(x)).join(" | "))}`,
       ),
     });
 

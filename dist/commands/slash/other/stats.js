@@ -35,7 +35,7 @@ exports.default = {
         let fetchedDevs = await Promise.all(unfetchedDevs);
         embed.addFields({
             name: "Information",
-            value: ctx.join(`Uptime: ${(0, discord_js_1.bold)(ctx.util.parseMS(ctx.client.uptime))}`, `Developer: ${(0, discord_js_1.bold)(fetchedDevs.map((x) => (0, discord_js_1.hyperlink)(`@${x.username}`, `https://discord.com/users/${x.id}`)).join(" | "))}`),
+            value: ctx.join(`Uptime: ${(0, discord_js_1.bold)(ctx.util.parseMS(ctx.client.uptime))}`, `Developer: ${(0, discord_js_1.bold)(fetchedDevs.map((x) => ctx.userLink(x)).join(" | "))}`),
         });
         await ctx.reply({
             content: "*Calculated*",
