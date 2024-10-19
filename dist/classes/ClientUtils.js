@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientUtils = void 0;
 const discord_js_1 = require("discord.js");
+const ChemicalElements = new discord_js_1.Collection();
 class ClientUtils {
     #client;
     constructor(client) {
@@ -66,6 +67,17 @@ class ClientUtils {
             [arr[i], arr[j]] = [arr[j], arr[i]];
         }
         return n > 1 ? this.shuffleArr(arr, n - 1) : arr;
+    }
+    getElements(s) {
+        let e = [];
+        for (let i = 0; i < s.length - 1; i++) {
+            let j = i + 1;
+            let t = s[i] + s[j];
+            let el = ChemicalElements.get(t);
+            if (el)
+                e.push(el);
+        }
+        return e;
     }
 }
 exports.ClientUtils = ClientUtils;

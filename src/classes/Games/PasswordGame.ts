@@ -14,18 +14,24 @@ import {
   ButtonBuilder,
   APIButtonComponentWithCustomId,
   Collection,
+  bold,
 } from "discord.js";
 import { createCanvas } from "@napi-rs/canvas";
 export type RuleChecker = (
   password: string,
   p?: PasswordGame,
 ) => Promise<boolean>;
+export type ShowPasswordError = (
+  password: string,
+  p: PasswordGame,
+) => Promise<string>;
 
 export interface Rule {
   id: string;
   rule: string;
   simple: boolean;
   check: RuleChecker;
+  show?: ShowPasswordError;
 }
 
 import _ChemicalElements from "../../../json/elements.json";
@@ -76,6 +82,9 @@ export const PasswordGameRules: Rule[] = [
     check: async function (password) {
       let sum = sumOfDigits(password);
       return sum === 25;
+    },
+    show: async function (password, p) {
+      return password.replace(/\d+/g, (m) => bold(m));
     },
   },
   {
@@ -198,9 +207,17 @@ export const PasswordGameRules: Rule[] = [
     id: "sumAtomicNumber",
     rule: "The elements in your password must have the sum of their atomic number equal to 200.",
     simple: true,
-    check: async function (password) {
-      let elements: ICE[] = getElements(password);
+    check: async function (password, p) {
+      let elements = p!.ctx.util.getElements(password);
       return elements.reduce((a, b) => a + b[2], 0) == 200;
+    },
+    show: async function (password, p) {
+      let elms = p.ctx.util.getElements(password);
+      for (let i = 0; i < elms.length; i++) {
+        const elm = elms[i][0];
+        password = password.replaceAll(elm, bold(elm));
+      }
+      return password;
     },
   },
   {
@@ -232,6 +249,7 @@ export class PasswordGame {
   public password = "";
   public emoji = ["✅", "❌"];
   public ruleN = 1;
+  public sruleN = 1;
   public _ = {
     wordleAnswer: null,
     captcha: null,
@@ -263,9 +281,11 @@ export class PasswordGame {
 
   public async getRulesString() {
     let rules: string[][] = [[], []];
+    this.sruleN = Infinity;
     for (let i = 0; i < this.ruleN; i++) {
       let rule = getRule(i + 1)!;
       let check = await rule.check(this.password, this);
+      if (!check) this.sruleN = Math.min(this.sruleN, i + 1);
       rules[check ? 1 : 0].push(
         (check ? "" : "> ") +
           `\`${this.emoji[check ? 0 : 1]}\` ${i + 1}. ${rule.rule}`,
@@ -274,8 +294,16 @@ export class PasswordGame {
     return rules.flat().join("\n").trim();
   }
 
+  public async formatPassword() {
+    let pass = this.password;
+    if (this.rulesCompleted()) return pass;
+    let rule = getRule(this.ruleN);
+    if (rule && rule.show) return await rule.show(pass, this);
+    return pass;
+  }
+
   public async makeEmbed(includelength = true) {
-    let ps = `> ${this.password ?? "*Enter your password*"}`;
+    let ps = `> ${this.password ? await this.formatPassword() : "*Enter your password*"}`;
     let embed_1 = this.ctx.util
       .embed()
       .setTitle("Password Game")
@@ -381,9 +409,7 @@ export class PasswordGame {
 
   public async start() {
     let modal = this.makeModal();
-
     await this.ctx.interaction.showModal(modal).catch(this.noerr.bind(this));
-
     try {
       let am = await this.ctx.interaction.awaitModalSubmit({
         time: 60 * 1000,
@@ -392,7 +418,6 @@ export class PasswordGame {
           i.customId == "game_password_" + this.ctx.user.id,
       });
       await am.deferReply().catch(this.noerr.bind(this));
-
       this.password = am.fields.getTextInputValue("password");
 
       /* Check the rules */
@@ -415,7 +440,7 @@ export class PasswordGame {
 
   public async listenModal(interaction: ModalSubmitInteraction) {
     if (!this.message) return;
-    await interaction.deferUpdate().catch(this.noerr.bind(this));
+    await interaction.deferUpdate().catch(this._noerr.bind(this));
     let value = interaction.fields.getTextInputValue("password");
     this.password = value;
 
@@ -477,22 +502,29 @@ export class PasswordGame {
 
   public sendTip(tipid: string, message: string, timeout?: number) {
     if (this._.tips.get(tipid)) return;
+    if (timeout) this._.tips.set(tipid, true);
     return this.message
       ?.reply(message)
       .then((x) => {
         if (timeout) {
-          this._.tips.set(tipid, true);
           setTimeout(async () => {
             if (x.deletable) x.delete().catch(() => {});
             this._.tips.set(tipid, false);
           }, timeout);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        this._.tips.set(tipid, false);
+      });
   }
   public noerr() {
-    this.message?.reply("Something went wrong!");
+    this._noerr(...arguments);
     return this.ctx.client.cache.games.password.delete(this.ctx.user.id);
+  }
+  public _noerr(...a: unknown[]) {
+    this.message?.reply("Something went wrong!");
+    console.log(...a);
+    return true;
   }
 }
 
@@ -640,15 +672,4 @@ function isPrime(num: number): boolean {
   }
 
   return true;
-}
-
-function getElements(s: string) {
-  let e: ICE[] = [];
-  for (let i = 0; i < s.length - 1; i++) {
-    let j = i + 1;
-    let t = s[i] + s[j];
-    let el = ChemicalElements.get(t);
-    if (el) e.push(el);
-  }
-  return e;
 }

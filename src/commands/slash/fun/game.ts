@@ -52,7 +52,7 @@ export default {
         });
       }
 
-      await ctx.defer();
+      //await ctx.defer();
       let game = new PasswordGame(ctx);
       game.start();
     },

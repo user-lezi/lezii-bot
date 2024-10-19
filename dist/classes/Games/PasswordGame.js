@@ -52,6 +52,9 @@ exports.PasswordGameRules = [
             let sum = sumOfDigits(password);
             return sum === 25;
         },
+        show: async function (password, p) {
+            return password.replace(/\d+/g, (m) => (0, discord_js_1.bold)(m));
+        },
     },
     {
         id: "captcha",
@@ -169,9 +172,17 @@ exports.PasswordGameRules = [
         id: "sumAtomicNumber",
         rule: "The elements in your password must have the sum of their atomic number equal to 200.",
         simple: true,
-        check: async function (password) {
-            let elements = getElements(password);
+        check: async function (password, p) {
+            let elements = p.ctx.util.getElements(password);
             return elements.reduce((a, b) => a + b[2], 0) == 200;
+        },
+        show: async function (password, p) {
+            let elms = p.ctx.util.getElements(password);
+            for (let i = 0; i < elms.length; i++) {
+                const elm = elms[i][0];
+                password = password.replaceAll(elm, (0, discord_js_1.bold)(elm));
+            }
+            return password;
         },
     },
     {
@@ -203,6 +214,7 @@ class PasswordGame {
     password = "";
     emoji = ["✅", "❌"];
     ruleN = 1;
+    sruleN = 1;
     _ = {
         wordleAnswer: null,
         captcha: null,
@@ -228,16 +240,28 @@ class PasswordGame {
     }
     async getRulesString() {
         let rules = [[], []];
+        this.sruleN = Infinity;
         for (let i = 0; i < this.ruleN; i++) {
             let rule = getRule(i + 1);
             let check = await rule.check(this.password, this);
+            if (!check)
+                this.sruleN = Math.min(this.sruleN, i + 1);
             rules[check ? 1 : 0].push((check ? "" : "> ") +
                 `\`${this.emoji[check ? 0 : 1]}\` ${i + 1}. ${rule.rule}`);
         }
         return rules.flat().join("\n").trim();
     }
+    async formatPassword() {
+        let pass = this.password;
+        if (this.rulesCompleted())
+            return pass;
+        let rule = getRule(this.ruleN);
+        if (rule && rule.show)
+            return await rule.show(pass, this);
+        return pass;
+    }
     async makeEmbed(includelength = true) {
-        let ps = `> ${this.password ?? "*Enter your password*"}`;
+        let ps = `> ${this.password ? await this.formatPassword() : "*Enter your password*"}`;
         let embed_1 = this.ctx.util
             .embed()
             .setTitle("Password Game")
@@ -358,7 +382,7 @@ class PasswordGame {
     async listenModal(interaction) {
         if (!this.message)
             return;
-        await interaction.deferUpdate().catch(this.noerr.bind(this));
+        await interaction.deferUpdate().catch(this._noerr.bind(this));
         let value = interaction.fields.getTextInputValue("password");
         this.password = value;
         let passed = await this.passedAllRules();
@@ -416,11 +440,12 @@ class PasswordGame {
     sendTip(tipid, message, timeout) {
         if (this._.tips.get(tipid))
             return;
+        if (timeout)
+            this._.tips.set(tipid, true);
         return this.message
             ?.reply(message)
             .then((x) => {
             if (timeout) {
-                this._.tips.set(tipid, true);
                 setTimeout(async () => {
                     if (x.deletable)
                         x.delete().catch(() => { });
@@ -428,11 +453,18 @@ class PasswordGame {
                 }, timeout);
             }
         })
-            .catch(() => { });
+            .catch(() => {
+            this._.tips.set(tipid, false);
+        });
     }
     noerr() {
-        this.message?.reply("Something went wrong!");
+        this._noerr(...arguments);
         return this.ctx.client.cache.games.password.delete(this.ctx.user.id);
+    }
+    _noerr(...a) {
+        this.message?.reply("Something went wrong!");
+        console.log(...a);
+        return true;
     }
 }
 exports.PasswordGame = PasswordGame;
@@ -562,16 +594,5 @@ function isPrime(num) {
         }
     }
     return true;
-}
-function getElements(s) {
-    let e = [];
-    for (let i = 0; i < s.length - 1; i++) {
-        let j = i + 1;
-        let t = s[i] + s[j];
-        let el = ChemicalElements.get(t);
-        if (el)
-            e.push(el);
-    }
-    return e;
 }
 //# sourceMappingURL=PasswordGame.js.map

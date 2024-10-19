@@ -1,11 +1,13 @@
 import { SlashContext } from "../../commands/context";
 import { EmbedBuilder, ModalBuilder, Message, ModalSubmitInteraction, ButtonInteraction, Collection } from "discord.js";
 export type RuleChecker = (password: string, p?: PasswordGame) => Promise<boolean>;
+export type ShowPasswordError = (password: string, p: PasswordGame) => Promise<string>;
 export interface Rule {
     id: string;
     rule: string;
     simple: boolean;
     check: RuleChecker;
+    show?: ShowPasswordError;
 }
 export type ICE = [string, string, number, number, string];
 export declare const TwoLetterElements: string[];
@@ -17,6 +19,7 @@ export declare class PasswordGame {
     password: string;
     emoji: string[];
     ruleN: number;
+    sruleN: number;
     _: {
         wordleAnswer: string | null;
         captcha: string | null;
@@ -29,6 +32,7 @@ export declare class PasswordGame {
     passedAllRules(): Promise<boolean>;
     rulesCompleted(): boolean;
     getRulesString(): Promise<string>;
+    formatPassword(): Promise<string>;
     makeEmbed(includelength?: boolean): Promise<EmbedBuilder[]>;
     makeModal(): ModalBuilder;
     makeMessage(): Promise<any>;
@@ -41,5 +45,6 @@ export declare class PasswordGame {
     refreshCaptcha(interaction: ButtonInteraction): Promise<void>;
     sendTip(tipid: string, message: string, timeout?: number): Promise<void> | undefined;
     noerr(): boolean;
+    _noerr(...a: unknown[]): boolean;
 }
 //# sourceMappingURL=PasswordGame.d.ts.map

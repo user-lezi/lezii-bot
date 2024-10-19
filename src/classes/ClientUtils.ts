@@ -2,9 +2,14 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  Collection,
   EmbedBuilder,
 } from "discord.js";
 import { type Client } from "../client";
+
+import _ChemicalElements from "../../json/elements.json";
+export type ICE = [string, string, number, number, string];
+const ChemicalElements = new Collection<string, ICE>();
 
 export class ClientUtils {
   #client: Client;
@@ -81,5 +86,16 @@ export class ClientUtils {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return n > 1 ? this.shuffleArr(arr, n - 1) : arr;
+  }
+
+  getElements(s: string) {
+    let e: ICE[] = [];
+    for (let i = 0; i < s.length - 1; i++) {
+      let j = i + 1;
+      let t = s[i] + s[j];
+      let el = ChemicalElements.get(t);
+      if (el) e.push(el);
+    }
+    return e;
   }
 }

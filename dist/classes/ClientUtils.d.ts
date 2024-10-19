@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { type Client } from "../client";
+export type ICE = [string, string, number, number, string];
 export declare class ClientUtils {
     #private;
     constructor(client: Client);
@@ -16,5 +17,6 @@ export declare class ClientUtils {
     roundN(n: number, decimals?: number): number;
     embed(): EmbedBuilder;
     shuffleArr<T>(arr: T[], n?: number): T[];
+    getElements(s: string): ICE[];
 }
 //# sourceMappingURL=ClientUtils.d.ts.map
