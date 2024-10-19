@@ -41,7 +41,8 @@ export class Client extends _Client<true> {
       async () =>
         `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
       async () => `Touch some grass`,
-      async () => `Try out /${this.application.commands.cache.random()!.name}`,
+      async () =>
+        `Try out /${this.application.commands.cache.random()?.name ?? "help"}`,
       async () => {
         let a = this.randomUser();
         let r = ["hello {}", "{} needs to touch some grass."];

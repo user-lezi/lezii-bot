@@ -17,5 +17,6 @@ export declare class SlashContext {
     join(...str: (string | string[])[]): string;
     sleep(ms: number): Promise<unknown>;
     userLink(user: UserResolvable): `https://discord.com/users/${string}`;
+    userMention(user: UserResolvable): `[@${string}](https://discord.com/users/${string})`;
 }
 //# sourceMappingURL=context.d.ts.map

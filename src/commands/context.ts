@@ -2,6 +2,7 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   GuildMember,
+  hyperlink,
   Message,
   ThreadMember,
   User,
@@ -61,5 +62,17 @@ export class SlashContext {
             ? user.id
             : user;
     return `https://discord.com/users/${id}` as const;
+  }
+
+  public userMention(user: UserResolvable) {
+    let username =
+      user instanceof GuildMember || user instanceof ThreadMember
+        ? user.user!.username
+        : user instanceof Message
+          ? user.author.username
+          : user instanceof User
+            ? user.username
+            : "unknown-user";
+    return hyperlink(`@${username}`, this.userLink(user));
   }
 }

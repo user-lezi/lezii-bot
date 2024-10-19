@@ -35,7 +35,7 @@ class Client extends discord_js_1.Client {
             async () => `${this.guilds.cache.size} Guilds FR`,
             async () => `${this.guilds.cache.reduce((a, b) => a + b.memberCount, 0)} Users FR`,
             async () => `Touch some grass`,
-            async () => `Try out /${this.application.commands.cache.random().name}`,
+            async () => `Try out /${this.application.commands.cache.random()?.name ?? "help"}`,
             async () => {
                 let a = this.randomUser();
                 let r = ["hello {}", "{} needs to touch some grass."];

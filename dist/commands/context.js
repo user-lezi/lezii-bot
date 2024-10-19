@@ -51,6 +51,16 @@ class SlashContext {
                     : user;
         return `https://discord.com/users/${id}`;
     }
+    userMention(user) {
+        let username = user instanceof discord_js_1.GuildMember || user instanceof discord_js_1.ThreadMember
+            ? user.user.username
+            : user instanceof discord_js_1.Message
+                ? user.author.username
+                : user instanceof discord_js_1.User
+                    ? user.username
+                    : "unknown-user";
+        return (0, discord_js_1.hyperlink)(`@${username}`, this.userLink(user));
+    }
 }
 exports.SlashContext = SlashContext;
 //# sourceMappingURL=context.js.map
