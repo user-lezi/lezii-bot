@@ -177,6 +177,9 @@ export class Client extends _Client<true> {
       this.user.setActivity(text.length > 128 ? "uwu" : text, {
         type: ActivityType.Custom,
       });
-    } catch {}
+      return text;
+    } catch {
+      return null;
+    }
   }
 }

@@ -24,6 +24,6 @@ export declare class Client extends _Client<true> {
     isDev(user: UserResolvable): boolean;
     login(): Promise<string>;
     randomUser(noBot?: boolean): User | null;
-    randomStatus(): Promise<void>;
+    randomStatus(): Promise<string | null>;
 }
 //# sourceMappingURL=client.d.ts.map

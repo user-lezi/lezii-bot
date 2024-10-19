@@ -146,8 +146,11 @@ class Client extends discord_js_1.Client {
             this.user.setActivity(text.length > 128 ? "uwu" : text, {
                 type: discord_js_1.ActivityType.Custom,
             });
+            return text;
         }
-        catch { }
+        catch {
+            return null;
+        }
     }
 }
 exports.Client = Client;
