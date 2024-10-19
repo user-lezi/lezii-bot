@@ -57,6 +57,15 @@ export class Client extends _Client<true> {
         let total = this.customStatuses.length;
         return `The probability of showing up this text is 1/${total} (~${(100 / total).toFixed(2)}%)`;
       },
+      async () => {
+        let url = "https://quotes-api-self.vercel.app/quote";
+        let res = (await fetch(url).then((x) => x.json())) as Record<
+          "quote" | "author",
+          string
+        >;
+        let text = `"${res.quote}" - ${res.author}`;
+        return text;
+      },
     ];
 
     this.on("ready", () => {
@@ -161,10 +170,13 @@ export class Client extends _Client<true> {
   }
 
   async randomStatus() {
-    let randomIndex = Math.floor(Math.random() * this.customStatuses.length);
-    let status = this.customStatuses[randomIndex].bind(this);
-    this.user.setActivity(await status(), {
-      type: ActivityType.Custom,
-    });
+    try {
+      let randomIndex = Math.floor(Math.random() * this.customStatuses.length);
+      let status = this.customStatuses[randomIndex].bind(this);
+      let text = await status();
+      this.user.setActivity(text.length > 128 ? "uwu" : text, {
+        type: ActivityType.Custom,
+      });
+    } catch {}
   }
 }
