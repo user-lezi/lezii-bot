@@ -41,6 +41,7 @@ exports.default = {
                     ephemeral: true,
                 });
             }
+            await ctx.defer();
             let game = new Games_1.PasswordGame(ctx);
             game.start();
         },

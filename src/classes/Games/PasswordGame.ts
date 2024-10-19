@@ -136,7 +136,9 @@ export const PasswordGameRules: Rule[] = [
     check: async function (password, p) {
       let emo = "🏋️";
       let req = 3;
-      let count = password.split(emo).length - 1;
+      let count = [...new Intl.Segmenter().segment(password)].filter(
+        (x) => x.segment == emo,
+      ).length;
       let r = count == req;
       if (!r && !p?._.tips.get("strongPassword"))
         p?.sendTip(
