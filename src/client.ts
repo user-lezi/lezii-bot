@@ -8,7 +8,7 @@ import {
   User,
 } from "discord.js";
 import { CommandManager } from "./commands";
-import { ClientUtils } from "./classes/ClientUtils";
+import { ChemicalElements, ClientUtils } from "./classes/ClientUtils";
 
 import { PasswordGame } from "./classes/Games";
 import chalk from "chalk";
@@ -60,6 +60,11 @@ export class Client extends _Client<true> {
       async () => {
         let res = await this.randomQuote();
         let text = `"${res.quote}" - ${res.author}`;
+        return text;
+      },
+      async () => {
+        let element = ChemicalElements.random()!;
+        let text = `Element with atomic number ${element[2]} and atomic mass ${element[3]} is ${element[0]} (${element[1]}) 🤓☝️`;
         return text;
       },
     ];

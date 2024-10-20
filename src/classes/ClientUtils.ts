@@ -39,6 +39,8 @@ export type ICE = [string, string, number, number, string];
 const ChemicalElements = new Collection<string, ICE>();
 (_ChemicalElements as ICE[]).forEach((x) => ChemicalElements.set(x[1], x));
 
+export { ChemicalElements };
+
 export class ClientUtils {
   #client: Client;
   constructor(client: Client) {

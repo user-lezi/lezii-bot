@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClientUtils = exports.TimeParser = void 0;
+exports.ClientUtils = exports.ChemicalElements = exports.TimeParser = void 0;
 const discord_js_1 = require("discord.js");
 const ms_utility_1 = __importDefault(require("ms-utility"));
 const constants_1 = require("ms-utility/dist/constants");
@@ -33,6 +33,7 @@ exports.TimeParser = new ms_utility_1.default([
 ]);
 const elements_json_1 = __importDefault(require("../../json/elements.json"));
 const ChemicalElements = new discord_js_1.Collection();
+exports.ChemicalElements = ChemicalElements;
 elements_json_1.default.forEach((x) => ChemicalElements.set(x[1], x));
 class ClientUtils {
     #client;

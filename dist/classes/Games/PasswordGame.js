@@ -1,16 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordGame = exports.PasswordGameRules = exports.TwoLetterElements = void 0;
 exports.getRule = getRule;
 const discord_js_1 = require("discord.js");
 const canvas_1 = require("@napi-rs/canvas");
-const elements_json_1 = __importDefault(require("../../../json/elements.json"));
-const ChemicalElements = new discord_js_1.Collection();
-elements_json_1.default.forEach((x) => ChemicalElements.set(x[1], x));
-exports.TwoLetterElements = Array.from(ChemicalElements.filter((x) => x[1].length == 2).keys());
+const ClientUtils_1 = require("../ClientUtils");
+exports.TwoLetterElements = Array.from(ClientUtils_1.ChemicalElements.filter((x) => x[1].length == 2).keys());
 exports.PasswordGameRules = [
     {
         id: "length",

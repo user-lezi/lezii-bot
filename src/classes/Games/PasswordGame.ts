@@ -35,10 +35,7 @@ export interface Rule {
   show?: ShowPasswordError;
 }
 
-import _ChemicalElements from "../../../json/elements.json";
-export type ICE = [string, string, number, number, string];
-const ChemicalElements = new Collection<string, ICE>();
-(_ChemicalElements as ICE[]).forEach((x) => ChemicalElements.set(x[1], x));
+import { ChemicalElements } from "../ClientUtils";
 export const TwoLetterElements = Array.from(
   ChemicalElements.filter((x) => x[1].length == 2).keys(),
 );

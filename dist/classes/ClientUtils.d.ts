@@ -1,8 +1,10 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder } from "discord.js";
 import { type Client } from "../client";
 import Parser from "ms-utility";
 export declare const TimeParser: Parser;
 export type ICE = [string, string, number, number, string];
+declare const ChemicalElements: Collection<string, ICE>;
+export { ChemicalElements };
 export declare class ClientUtils {
     #private;
     constructor(client: Client);

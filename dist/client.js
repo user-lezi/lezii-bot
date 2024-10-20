@@ -52,6 +52,11 @@ class Client extends discord_js_1.Client {
                 let text = `"${res.quote}" - ${res.author}`;
                 return text;
             },
+            async () => {
+                let element = ClientUtils_1.ChemicalElements.random();
+                let text = `Element with atomic number ${element[2]} and atomic mass ${element[3]} is ${element[0]} (${element[1]}) 🤓☝️`;
+                return text;
+            },
         ];
         this.on("ready", () => {
             this.commands.registerSlashCommands().then(() => this.application.fetch().then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
