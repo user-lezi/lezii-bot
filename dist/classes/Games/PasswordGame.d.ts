@@ -46,5 +46,7 @@ export declare class PasswordGame {
     sendTip(tipid: string, message: string, timeout?: number): Promise<void> | undefined;
     noerr(): boolean;
     _noerr(...a: unknown[]): boolean;
+    exists(): false | Promise<boolean>;
+    messageLocation(): `https://discord.com/channels/${string}/${string}/${string}` | null;
 }
 //# sourceMappingURL=PasswordGame.d.ts.map

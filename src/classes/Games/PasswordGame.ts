@@ -15,6 +15,7 @@ import {
   APIButtonComponentWithCustomId,
   Collection,
   bold,
+  messageLink,
 } from "discord.js";
 import { createCanvas } from "@napi-rs/canvas";
 export type RuleChecker = (
@@ -525,6 +526,23 @@ export class PasswordGame {
     this.message?.reply("Something went wrong!");
     console.log(...a);
     return true;
+  }
+  public exists() {
+    return this.message
+      ? this.message
+          .fetch(true)
+          .then(() => true)
+          .catch(() => false)
+      : false;
+  }
+  public messageLocation() {
+    return this.message
+      ? messageLink(
+          this.message.channelId,
+          this.message.id,
+          this.message.guildId!,
+        )
+      : null;
   }
 }
 

@@ -466,6 +466,19 @@ class PasswordGame {
         console.log(...a);
         return true;
     }
+    exists() {
+        return this.message
+            ? this.message
+                .fetch(true)
+                .then(() => true)
+                .catch(() => false)
+            : false;
+    }
+    messageLocation() {
+        return this.message
+            ? (0, discord_js_1.messageLink)(this.message.channelId, this.message.id, this.message.guildId)
+            : null;
+    }
 }
 exports.PasswordGame = PasswordGame;
 async function getWordleAnswer(p) {
