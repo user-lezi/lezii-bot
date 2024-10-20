@@ -25,5 +25,6 @@ export declare class Client extends _Client<true> {
     login(): Promise<string>;
     randomUser(noBot?: boolean): User | null;
     randomStatus(): Promise<string | null>;
+    randomQuote(): Promise<Record<"author" | "quote", string>>;
 }
 //# sourceMappingURL=client.d.ts.map

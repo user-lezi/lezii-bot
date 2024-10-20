@@ -48,22 +48,18 @@ class Client extends discord_js_1.Client {
                 return `The probability of showing up this text is 1/${total} (~${(100 / total).toFixed(2)}%)`;
             },
             async () => {
-                let url = "https://quotes-api-self.vercel.app/quote";
-                let res = (await fetch(url).then((x) => x.json()));
+                let res = await this.randomQuote();
                 let text = `"${res.quote}" - ${res.author}`;
                 return text;
             },
         ];
         this.on("ready", () => {
-            this.commands
-                .registerSlashCommands()
-                .then(() => this.application
-                .fetch()
-                .then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
+            this.commands.registerSlashCommands().then(() => this.application.fetch().then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
                 1) &&
                 this.application.commands
                     .fetch()
-                    .then(() => console.log(chalk_1.default.greenBright("!! Fetched all the application commands")))));
+                    .then(() => console.log(chalk_1.default.greenBright("!! Fetched all the application commands")))
+                    .then(() => this.randomQuote().then((d) => console.log(`"${chalk_1.default.bold(d.quote)}" - ${chalk_1.default.italic.grey(d.author)}`)))));
             let channel = this.channels.cache.get(this._.channels.readyLog);
             let message = {
                 embeds: [
@@ -151,6 +147,11 @@ class Client extends discord_js_1.Client {
         catch {
             return null;
         }
+    }
+    async randomQuote() {
+        let url = "https://quotes-api-self.vercel.app/quote";
+        let res = (await fetch(url).then((x) => x.json()));
+        return res;
     }
 }
 exports.Client = Client;

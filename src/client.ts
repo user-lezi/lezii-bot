@@ -58,39 +58,36 @@ export class Client extends _Client<true> {
         return `The probability of showing up this text is 1/${total} (~${(100 / total).toFixed(2)}%)`;
       },
       async () => {
-        let url = "https://quotes-api-self.vercel.app/quote";
-        let res = (await fetch(url).then((x) => x.json())) as Record<
-          "quote" | "author",
-          string
-        >;
+        let res = await this.randomQuote();
         let text = `"${res.quote}" - ${res.author}`;
         return text;
       },
     ];
 
     this.on("ready", () => {
-      this.commands
-        .registerSlashCommands()
-        .then(() =>
-          this.application
-            .fetch()
-            .then(
-              () =>
-                (console.log(
-                  chalk.greenBright("!! Fetched the application information"),
-                ),
-                1) &&
-                this.application.commands
-                  .fetch()
-                  .then(() =>
-                    console.log(
-                      chalk.greenBright(
-                        "!! Fetched all the application commands",
-                      ),
-                    ),
-                  ),
+      this.commands.registerSlashCommands().then(() =>
+        this.application.fetch().then(
+          () =>
+            (console.log(
+              chalk.greenBright("!! Fetched the application information"),
             ),
-        );
+            1) &&
+            this.application.commands
+              .fetch()
+              .then(() =>
+                console.log(
+                  chalk.greenBright("!! Fetched all the application commands"),
+                ),
+              )
+              .then(() =>
+                this.randomQuote().then((d) =>
+                  console.log(
+                    `"${chalk.bold(d.quote)}" - ${chalk.italic.grey(d.author)}`,
+                  ),
+                ),
+              ),
+        ),
+      );
       let channel = this.channels.cache.get(
         this._.channels.readyLog,
       ) as GuildTextBasedChannel;
@@ -181,5 +178,13 @@ export class Client extends _Client<true> {
     } catch {
       return null;
     }
+  }
+  async randomQuote() {
+    let url = "https://quotes-api-self.vercel.app/quote";
+    let res = (await fetch(url).then((x) => x.json())) as Record<
+      "quote" | "author",
+      string
+    >;
+    return res;
   }
 }
