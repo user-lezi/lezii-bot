@@ -1,5 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { type Client } from "../client";
+import Parser from "ms-utility";
+export declare const TimeParser: Parser;
 export type ICE = [string, string, number, number, string];
 export declare class ClientUtils {
     #private;

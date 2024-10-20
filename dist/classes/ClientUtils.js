@@ -3,8 +3,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClientUtils = void 0;
+exports.ClientUtils = exports.TimeParser = void 0;
 const discord_js_1 = require("discord.js");
+const ms_utility_1 = __importDefault(require("ms-utility"));
+const constants_1 = require("ms-utility/dist/constants");
+exports.TimeParser = new ms_utility_1.default([
+    ...constants_1.DefaultTimeUnits,
+    [
+        "w",
+        {
+            word: "week",
+            ms: 1_000 * 60 * 60 * 24 * 7,
+        },
+    ],
+    [
+        "M",
+        {
+            word: "month",
+            ms: 1_000 * 60 * 60 * 24 * 30,
+        },
+    ],
+    [
+        "y",
+        {
+            word: "year",
+            ms: 1_000 * 60 * 60 * 24 * 30 * 12,
+        },
+    ],
+]);
 const elements_json_1 = __importDefault(require("../../json/elements.json"));
 const ChemicalElements = new discord_js_1.Collection();
 elements_json_1.default.forEach((x) => ChemicalElements.set(x[1], x));
@@ -43,22 +69,10 @@ class ClientUtils {
         };
     }
     parseMS(ms) {
-        let c = {
-            s: 1000,
-            m: 1000 * 60,
-            h: 1000 * 60 * 60,
-            d: 1000 * 60 * 60 * 24,
-        };
-        if (ms < 1000)
-            return ms + "ms";
-        let d = ms / c.d;
-        let h = (ms % c.d) / c.h;
-        let m = (ms % c.h) / c.m;
-        let s = (ms % c.s) / c.s;
-        return ((d >= 1 ? `${Math.floor(d)}d ` : "") +
-            (h >= 1 ? `${Math.floor(h)}h ` : "") +
-            (m >= 1 ? `${Math.floor(m)}m ` : "") +
-            (s >= 1 ? `${Math.floor(s)}s` : ""));
+        return exports.TimeParser.parseToString(ms, {
+            and: false,
+            separator: " ",
+        });
     }
     roundN(n, decimals = 2) {
         return Number(n.toFixed(decimals));

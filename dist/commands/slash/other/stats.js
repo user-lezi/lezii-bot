@@ -15,16 +15,22 @@ exports.default = {
         let count = {
             server: ctx.client.guilds.cache.size,
             members: ctx.client.guilds.cache.reduce((a, b) => a + b.memberCount, 0),
+            users: ctx.client.users.cache.size,
+        };
+        let versions = {
+            node: process.version,
+            djs: "v" + require("discord.js").version,
+            ts: "v" + require("typescript").version,
         };
         /* Pings */
         embed.addFields({
-            name: "Latency",
-            value: ctx.join(`Bot Latency: ${(0, discord_js_1.bold)(ping + "ms")}`, `Roundtrip Latency: ${(0, discord_js_1.bold)(roundtrip.toFixed(2) + "ms")}`),
+            name: "⏱ | Latency",
+            value: ctx.join(`> Bot Latency: ${(0, discord_js_1.inlineCode)(ping + "ms")}`, `> Roundtrip Latency: ${(0, discord_js_1.inlineCode)(roundtrip.toFixed(2) + "ms")}`),
         });
         /* Statistics */
         embed.addFields({
-            name: "Statistics",
-            value: ctx.join(`Server Count: ${(0, discord_js_1.bold)(count.server.toLocaleString())}`, `Members Count: ${(0, discord_js_1.bold)(count.members.toLocaleString())}`),
+            name: "📊 | Statistics",
+            value: ctx.join(`> Server Count: ${(0, discord_js_1.inlineCode)(count.server.toLocaleString())}`, `> Members Count: ${(0, discord_js_1.inlineCode)(count.members.toLocaleString())}`, `> Uniquely Cached Users: ${(0, discord_js_1.inlineCode)(count.users.toLocaleString())}`),
         });
         /* Infmarsion */
         let devs = ctx.client._.devs;
@@ -34,11 +40,16 @@ exports.default = {
         }
         let fetchedDevs = await Promise.all(unfetchedDevs);
         embed.addFields({
-            name: "Information",
-            value: ctx.join(`Uptime: ${(0, discord_js_1.bold)(ctx.util.parseMS(ctx.client.uptime))}`, `Developer: ${(0, discord_js_1.bold)(fetchedDevs.map((x) => ctx.userMention(x)).join(" | "))}`),
+            name: "ℹ️ | Information",
+            value: ctx.join(`> Uptime: ${(0, discord_js_1.bold)(ctx.util.parseMS(ctx.client.uptime))}`, `> Developer: ${(0, discord_js_1.bold)(fetchedDevs.map((x) => ctx.userMention(x)).join(" | "))}`),
+        });
+        /* Versions */
+        embed.addFields({
+            name: "⚙️ | Versions",
+            value: ctx.join(`> Node.js: ${(0, discord_js_1.inlineCode)(versions.node)}`, `> Discord.js: ${(0, discord_js_1.inlineCode)(versions.djs)}`, `> Typescript: ${(0, discord_js_1.inlineCode)(versions.ts)}`),
         });
         await ctx.reply({
-            content: "*Calculated*",
+            content: null,
             embeds: [embed],
         });
     },

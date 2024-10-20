@@ -6,6 +6,33 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { type Client } from "../client";
+import Parser from "ms-utility";
+import { DefaultTimeUnits } from "ms-utility/dist/constants";
+
+export const TimeParser = new Parser([
+  ...DefaultTimeUnits,
+  [
+    "w",
+    {
+      word: "week",
+      ms: 1_000 * 60 * 60 * 24 * 7,
+    },
+  ],
+  [
+    "M",
+    {
+      word: "month",
+      ms: 1_000 * 60 * 60 * 24 * 30,
+    },
+  ],
+  [
+    "y",
+    {
+      word: "year",
+      ms: 1_000 * 60 * 60 * 24 * 30 * 12,
+    },
+  ],
+]);
 
 import _ChemicalElements from "../../json/elements.json";
 export type ICE = [string, string, number, number, string];
@@ -54,23 +81,10 @@ export class ClientUtils {
   }
 
   public parseMS(ms: number) {
-    let c = {
-      s: 1000,
-      m: 1000 * 60,
-      h: 1000 * 60 * 60,
-      d: 1000 * 60 * 60 * 24,
-    };
-    if (ms < 1000) return ms + "ms";
-    let d = ms / c.d;
-    let h = (ms % c.d) / c.h;
-    let m = (ms % c.h) / c.m;
-    let s = (ms % c.s) / c.s;
-    return (
-      (d >= 1 ? `${Math.floor(d)}d ` : "") +
-      (h >= 1 ? `${Math.floor(h)}h ` : "") +
-      (m >= 1 ? `${Math.floor(m)}m ` : "") +
-      (s >= 1 ? `${Math.floor(s)}s` : "")
-    );
+    return TimeParser.parseToString(ms, {
+      and: false,
+      separator: " ",
+    });
   }
 
   public roundN(n: number, decimals: number = 2) {
