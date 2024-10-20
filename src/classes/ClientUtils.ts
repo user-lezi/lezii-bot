@@ -10,6 +10,7 @@ import { type Client } from "../client";
 import _ChemicalElements from "../../json/elements.json";
 export type ICE = [string, string, number, number, string];
 const ChemicalElements = new Collection<string, ICE>();
+(_ChemicalElements as ICE[]).forEach((x) => ChemicalElements.set(x[1], x));
 
 export class ClientUtils {
   #client: Client;

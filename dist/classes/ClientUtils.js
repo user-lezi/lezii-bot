@@ -1,8 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientUtils = void 0;
 const discord_js_1 = require("discord.js");
+const elements_json_1 = __importDefault(require("../../json/elements.json"));
 const ChemicalElements = new discord_js_1.Collection();
+elements_json_1.default.forEach((x) => ChemicalElements.set(x[1], x));
 class ClientUtils {
     #client;
     constructor(client) {
