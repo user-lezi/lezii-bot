@@ -17,6 +17,7 @@ export default {
     await ctx.reply("*Calculating Roundtrip Latency...*");
     roundtrip = performance.now() - roundtrip;
     let ping = ctx.client.ws.ping;
+    let dbping = await ctx.client.db.ping(false);
 
     let embed = ctx.util.embed().setTitle(`Bot Statistics`);
 
@@ -38,6 +39,7 @@ export default {
       value: ctx.join(
         `> Bot Latency: ${inlineCode(ping + "ms")}`,
         `> Roundtrip Latency: ${inlineCode(roundtrip.toFixed(2) + "ms")}`,
+        `> Database Latency: ${inlineCode(dbping.total.toFixed(2) + "ms")}`,
       ),
     });
 

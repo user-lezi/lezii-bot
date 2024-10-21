@@ -11,6 +11,7 @@ exports.default = {
         await ctx.reply("*Calculating Roundtrip Latency...*");
         roundtrip = performance.now() - roundtrip;
         let ping = ctx.client.ws.ping;
+        let dbping = await ctx.client.db.ping(false);
         let embed = ctx.util.embed().setTitle(`Bot Statistics`);
         let count = {
             server: ctx.client.guilds.cache.size,
@@ -25,7 +26,7 @@ exports.default = {
         /* Pings */
         embed.addFields({
             name: "⏱ | Latency",
-            value: ctx.join(`> Bot Latency: ${(0, discord_js_1.inlineCode)(ping + "ms")}`, `> Roundtrip Latency: ${(0, discord_js_1.inlineCode)(roundtrip.toFixed(2) + "ms")}`),
+            value: ctx.join(`> Bot Latency: ${(0, discord_js_1.inlineCode)(ping + "ms")}`, `> Roundtrip Latency: ${(0, discord_js_1.inlineCode)(roundtrip.toFixed(2) + "ms")}`, `> Database Latency: ${(0, discord_js_1.inlineCode)(dbping.total.toFixed(2) + "ms")}`),
         });
         /* Statistics */
         embed.addFields({
