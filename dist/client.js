@@ -8,6 +8,7 @@ const discord_js_1 = require("discord.js");
 const commands_1 = require("./commands");
 const ClientUtils_1 = require("./classes/ClientUtils");
 const chalk_1 = __importDefault(require("chalk"));
+const discord_channel_db_1 = require("discord-channel.db");
 class Client extends discord_js_1.Client {
     _ = {
         devs: ["910837428862984213"],
@@ -25,6 +26,12 @@ class Client extends discord_js_1.Client {
     };
     commands = new commands_1.CommandManager(this);
     util = new ClientUtils_1.ClientUtils(this);
+    db = new discord_channel_db_1.Database(this, {
+        guilds: [process.env.DatabaseGuild],
+        deleteNonDBChannels: false,
+        size: 5,
+        cacheEvery: 60_000,
+    });
     customStatuses;
     constructor() {
         super({
@@ -59,12 +66,15 @@ class Client extends discord_js_1.Client {
             },
         ];
         this.on("ready", () => {
-            this.commands.registerSlashCommands().then(() => this.application.fetch().then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
+            this.db.connect().then(() => this.commands.registerSlashCommands().then(() => this.application
+                .fetch()
+                .then(() => console.log(chalk_1.default.greenBright("!! Database Ready")))
+                .then(() => (console.log(chalk_1.default.greenBright("!! Fetched the application information")),
                 1) &&
                 this.application.commands
                     .fetch()
                     .then(() => console.log(chalk_1.default.greenBright("!! Fetched all the application commands")))
-                    .then(() => this.randomQuote().then((d) => console.log(`"${chalk_1.default.bold(d.quote)}" - ${chalk_1.default.italic.grey(d.author)}`)))));
+                    .then(() => this.randomQuote().then((d) => console.log(`"${chalk_1.default.bold(d.quote)}" - ${chalk_1.default.italic.grey(d.author)}`))))));
             let channel = this.channels.cache.get(this._.channels.readyLog);
             let message = {
                 embeds: [

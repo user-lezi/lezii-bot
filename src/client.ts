@@ -12,6 +12,7 @@ import { ChemicalElements, ClientUtils } from "./classes/ClientUtils";
 
 import { PasswordGame } from "./classes/Games";
 import chalk from "chalk";
+import { Database } from "discord-channel.db";
 
 export class Client extends _Client<true> {
   public _ = {
@@ -30,6 +31,12 @@ export class Client extends _Client<true> {
   };
   public commands = new CommandManager(this);
   public util = new ClientUtils(this);
+  public db = new Database(this, {
+    guilds: [process.env.DatabaseGuild!],
+    deleteNonDBChannels: false,
+    size: 5,
+    cacheEvery: 60_000,
+  });
   public customStatuses: Array<(this: Client) => Promise<string>>;
   constructor() {
     super({
@@ -70,27 +77,34 @@ export class Client extends _Client<true> {
     ];
 
     this.on("ready", () => {
-      this.commands.registerSlashCommands().then(() =>
-        this.application.fetch().then(
-          () =>
-            (console.log(
-              chalk.greenBright("!! Fetched the application information"),
-            ),
-            1) &&
-            this.application.commands
-              .fetch()
-              .then(() =>
-                console.log(
-                  chalk.greenBright("!! Fetched all the application commands"),
+      this.db.connect().then(() =>
+        this.commands.registerSlashCommands().then(() =>
+          this.application
+            .fetch()
+            .then(() => console.log(chalk.greenBright("!! Database Ready")))
+            .then(
+              () =>
+                (console.log(
+                  chalk.greenBright("!! Fetched the application information"),
                 ),
-              )
-              .then(() =>
-                this.randomQuote().then((d) =>
-                  console.log(
-                    `"${chalk.bold(d.quote)}" - ${chalk.italic.grey(d.author)}`,
+                1) &&
+                this.application.commands
+                  .fetch()
+                  .then(() =>
+                    console.log(
+                      chalk.greenBright(
+                        "!! Fetched all the application commands",
+                      ),
+                    ),
+                  )
+                  .then(() =>
+                    this.randomQuote().then((d) =>
+                      console.log(
+                        `"${chalk.bold(d.quote)}" - ${chalk.italic.grey(d.author)}`,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+            ),
         ),
       );
       let channel = this.channels.cache.get(

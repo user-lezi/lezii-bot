@@ -2,6 +2,7 @@ import { Client as _Client, UserResolvable, Collection, User } from "discord.js"
 import { CommandManager } from "./commands";
 import { ClientUtils } from "./classes/ClientUtils";
 import { PasswordGame } from "./classes/Games";
+import { Database } from "discord-channel.db";
 export declare class Client extends _Client<true> {
     _: {
         devs: string[];
@@ -19,6 +20,7 @@ export declare class Client extends _Client<true> {
     };
     commands: CommandManager;
     util: ClientUtils;
+    db: Database;
     customStatuses: Array<(this: Client) => Promise<string>>;
     constructor();
     isDev(user: UserResolvable): boolean;
