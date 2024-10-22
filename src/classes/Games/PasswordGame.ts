@@ -34,6 +34,12 @@ export interface Rule {
   check: RuleChecker;
   show?: ShowPasswordError;
 }
+export type TPasswordScore = {
+  password: string;
+  length: number;
+  time: number;
+  date: number;
+};
 
 import { ChemicalElements } from "../ClientUtils";
 export const TwoLetterElements = Array.from(
@@ -468,6 +474,33 @@ export class PasswordGame {
         embeds,
       });
       this.ctx.client.cache.games.password.delete(this.ctx.user.id);
+
+      let dbkey = `lb_pg_${this.ctx.user.id}`;
+      let newScore: TPasswordScore = {
+        password: this.password,
+        length: this.password.length,
+        time: Date.now() - this.time,
+        date: Date.now(),
+      };
+      let userPreScores = (this.ctx.db.get(dbkey) ?? { value: [] })
+        .value as TPasswordScore[];
+      /* Length wise */
+      if (userPreScores[0]) {
+        if (userPreScores[0].length > newScore.length) {
+          userPreScores[0] = newScore;
+        }
+      } else {
+        userPreScores[0] = newScore;
+      }
+      /* time wise */
+      if (userPreScores[1]) {
+        if (userPreScores[1].time > newScore.time) {
+          userPreScores[1] = newScore;
+        }
+      } else {
+        userPreScores[1] = newScore;
+      }
+      this.ctx.db.set(dbkey, userPreScores);
       return;
     }
     let message = await this.makeMessage();

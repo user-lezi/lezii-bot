@@ -9,6 +9,12 @@ export interface Rule {
     check: RuleChecker;
     show?: ShowPasswordError;
 }
+export type TPasswordScore = {
+    password: string;
+    length: number;
+    time: number;
+    date: number;
+};
 export declare const TwoLetterElements: string[];
 export declare const PasswordGameRules: Rule[];
 export declare function getRule(q: number | string): Rule | undefined;

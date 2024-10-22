@@ -34,6 +34,9 @@ export class SlashContext {
   public get util() {
     return this.client.util;
   }
+  public get db() {
+    return this.client.db;
+  }
 
   public defer() {
     return this.interaction.deferReply().catch(() => null);
@@ -53,6 +56,13 @@ export class SlashContext {
   }
 
   public userLink(user: UserResolvable) {
+    return SlashContext.userLink(user);
+  }
+  public userMention(user: UserResolvable) {
+    return SlashContext.userMention(user);
+  }
+
+  public static userLink(user: UserResolvable) {
     let id =
       user instanceof GuildMember || user instanceof ThreadMember
         ? user.user!.id
@@ -64,7 +74,7 @@ export class SlashContext {
     return `https://discord.com/users/${id}` as const;
   }
 
-  public userMention(user: UserResolvable) {
+  public static userMention(user: UserResolvable) {
     let username =
       user instanceof GuildMember || user instanceof ThreadMember
         ? user.user!.username

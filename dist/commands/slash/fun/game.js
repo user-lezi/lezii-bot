@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Games = void 0;
 const discord_js_1 = require("discord.js");
 const Games_1 = require("../../../classes/Games");
-exports.Games = [{ name: "Password Game", value: "password" }];
 exports.default = {
     builder: new discord_js_1.SlashCommandBuilder()
         .setName("game")
@@ -15,17 +13,57 @@ exports.default = {
         .setName("game")
         .setDescription("The game to uncache")
         .setRequired(false)
-        .addChoices(...exports.Games)))
+        .addChoices(...Games_1.Games)))
+        .addSubcommand((sub) => sub
+        .setName("leaderboard")
+        .setDescription("Shows the leaderboards for specific game.")
+        .addStringOption((opt) => opt
+        .setName("game")
+        .setDescription("The game to show")
+        .setRequired(true)
+        .addChoices(...Games_1.Games)))
         .addSubcommand((sub) => sub.setName("password").setDescription("Play a password game")),
     defer: false,
     execute: {
+        leaderboard: async function (ctx) {
+            let s = performance.now();
+            let game = ctx.interaction.options.getString("game", true);
+            let lb;
+            if (game == "password") {
+                //@ts-ignore
+                lb = new Games_1.PasswordGameLeaderboard(ctx.client, 10);
+            }
+            else {
+                return await ctx.reply("Under Development");
+            }
+            await ctx.defer();
+            let _game = Games_1.Games.find((x) => x.value == game);
+            await lb.init();
+            let list = lb.list();
+            let embed = ctx.util
+                .embed()
+                .setDescription(ctx.join((0, discord_js_1.heading)(`Leaderboard`, discord_js_1.HeadingLevel.One), (0, discord_js_1.heading)(_game.name, discord_js_1.HeadingLevel.Two), (0, discord_js_1.heading)(list.join("\n"), discord_js_1.HeadingLevel.Three)))
+                .setThumbnail("https://png.pngtree.com/png-vector/20221025/ourmid/pngtree-podiums-for-winners-with-1st-png-image_6376857.png")
+                .setTimestamp()
+                .setFooter({
+                iconURL: ctx.user.displayAvatarURL(),
+                text: "@" + ctx.user.username,
+            });
+            let msg = await ctx.reply({
+                embeds: [embed],
+                components: lb.components(ctx.user.id),
+            });
+            lb.interact(msg);
+        },
         uncache: async function (ctx) {
             let input = ctx.interaction.options.getString("game");
             let gameCmd = ctx.applicationCommands.find((x) => x.name == "game");
             if (input) {
                 let cache = ctx.client.cache.games[input];
                 let cached = cache.get(ctx.user.id);
-                let game = exports.Games.find((x) => x.value == input);
+                let game = Games_1.Games.find((x) => x.value == input);
+                if (!game)
+                    return await ctx.reply({ content: "Still under development...." });
                 if (!cached)
                     return await ctx.reply({
                         content: "No cache found for " + (0, discord_js_1.bold)(game.name),
@@ -82,7 +120,7 @@ exports.default = {
                 /* list all the games that has been cached */
                 let list = [];
                 let n = 1;
-                for (const game of exports.Games) {
+                for (const game of Games_1.Games) {
                     let cache = ctx.client.cache.games[game.value];
                     let cached = cache.get(ctx.user.id);
                     let cmd = `</game ${game.value}:${gameCmd.id}>`;

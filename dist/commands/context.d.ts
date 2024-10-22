@@ -12,11 +12,14 @@ export declare class SlashContext {
     get guild(): import("discord.js").Guild | null;
     get channel(): import("discord.js").TextBasedChannel | null;
     get util(): import("../classes/ClientUtils").ClientUtils;
+    get db(): import("discord-channel.db").Database;
     defer(): Promise<import("discord.js").InteractionResponse<boolean> | null>;
     reply(message: any): Promise<Message<boolean>>;
     join(...str: (string | string[])[]): string;
     sleep(ms: number): Promise<unknown>;
     userLink(user: UserResolvable): `https://discord.com/users/${string}`;
     userMention(user: UserResolvable): `[@${string}](https://discord.com/users/${string})`;
+    static userLink(user: UserResolvable): `https://discord.com/users/${string}`;
+    static userMention(user: UserResolvable): `[@${string}](https://discord.com/users/${string})`;
 }
 //# sourceMappingURL=context.d.ts.map

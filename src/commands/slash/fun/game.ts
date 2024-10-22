@@ -1,19 +1,21 @@
 import {
   bold,
   ButtonStyle,
+  heading,
+  HeadingLevel,
   italic,
   messageLink,
   SlashCommandBuilder,
 } from "discord.js";
 import { SlashCommand } from "../..";
 
-import { PasswordGame } from "../../../classes/Games";
+import {
+  BaseLeaderboard,
+  Games,
+  PasswordGame,
+  PasswordGameLeaderboard,
+} from "../../../classes/Games";
 import { type Client } from "../../../client";
-
-export const Games = [{ name: "Password Game", value: "password" }] as {
-  name: string;
-  value: keyof Client["cache"]["games"];
-}[];
 
 export default {
   builder: new SlashCommandBuilder()
@@ -32,10 +34,59 @@ export default {
         ),
     )
     .addSubcommand((sub) =>
+      sub
+        .setName("leaderboard")
+        .setDescription("Shows the leaderboards for specific game.")
+        .addStringOption((opt) =>
+          opt
+            .setName("game")
+            .setDescription("The game to show")
+            .setRequired(true)
+            .addChoices(...Games),
+        ),
+    )
+    .addSubcommand((sub) =>
       sub.setName("password").setDescription("Play a password game"),
     ),
   defer: false,
   execute: {
+    leaderboard: async function (ctx) {
+      let s = performance.now();
+      let game = ctx.interaction.options.getString("game", true);
+      let lb: BaseLeaderboard;
+      if (game == "password") {
+        //@ts-ignore
+        lb = new PasswordGameLeaderboard(ctx.client, 10);
+      } else {
+        return await ctx.reply("Under Development");
+      }
+      await ctx.defer();
+      let _game = Games.find((x) => x.value == game)!;
+      await lb.init();
+      let list = lb.list();
+      let embed = ctx.util
+        .embed()
+        .setDescription(
+          ctx.join(
+            heading(`Leaderboard`, HeadingLevel.One),
+            heading(_game.name, HeadingLevel.Two),
+            heading(list.join("\n"), HeadingLevel.Three),
+          ),
+        )
+        .setThumbnail(
+          "https://png.pngtree.com/png-vector/20221025/ourmid/pngtree-podiums-for-winners-with-1st-png-image_6376857.png",
+        )
+        .setTimestamp()
+        .setFooter({
+          iconURL: ctx.user.displayAvatarURL(),
+          text: "@" + ctx.user.username,
+        });
+      let msg = await ctx.reply({
+        embeds: [embed],
+        components: lb.components(ctx.user.id),
+      });
+      lb.interact(msg);
+    },
     uncache: async function (ctx) {
       let input = ctx.interaction.options.getString("game");
       let gameCmd = ctx.applicationCommands.find((x) => x.name == "game")!;
@@ -43,7 +94,9 @@ export default {
         let cache =
           ctx.client.cache.games[input as keyof Client["cache"]["games"]];
         let cached = cache.get(ctx.user.id);
-        let game = Games.find((x) => x.value == input)!;
+        let game = Games.find((x) => x.value == input);
+        if (!game)
+          return await ctx.reply({ content: "Still under development...." });
         if (!cached)
           return await ctx.reply({
             content: "No cache found for " + bold(game.name),
