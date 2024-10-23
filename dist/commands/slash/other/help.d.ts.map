@@ -1,1 +1,1 @@
-{"version":3,"file":"help.d.ts","sourceRoot":"","sources":["../../../../src/commands/slash/other/help.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,YAAY,EAAE,MAAM,OAAO,CAAC;wBAgChC,YAAY,CAAC,KAAK,CAAC;AA9BxB,wBA8ByB"}
+{"version":3,"file":"help.d.ts","sourceRoot":"","sources":["../../../../src/commands/slash/other/help.ts"],"names":[],"mappings":"AAYA,OAAO,EAAE,YAAY,EAAE,MAAM,OAAO,CAAC;wBAqLhC,YAAY,CAAC,KAAK,CAAC;AAlLxB,wBAkLyB"}

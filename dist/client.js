@@ -9,6 +9,7 @@ const commands_1 = require("./commands");
 const ClientUtils_1 = require("./classes/ClientUtils");
 const chalk_1 = __importDefault(require("chalk"));
 const discord_channel_db_1 = require("discord-channel.db");
+const rawCommands_1 = require("./rawCommands");
 class Client extends discord_js_1.Client {
     _ = {
         devs: ["910837428862984213"],
@@ -32,6 +33,7 @@ class Client extends discord_js_1.Client {
         size: 5,
         cacheEvery: 60_000,
     });
+    rawCommands = rawCommands_1.RawCommands;
     customStatuses;
     constructor() {
         super({
@@ -167,6 +169,14 @@ class Client extends discord_js_1.Client {
         let url = "https://quotes-api-self.vercel.app/quote";
         let res = (await fetch(url).then((x) => x.json()));
         return res;
+    }
+    findCommand(s) {
+        let tosearch = s.toLowerCase();
+        let tosearchapp = tosearch.split(" ")[0];
+        return {
+            json: this.rawCommands.find((x) => x.name == tosearch),
+            app: this.application.commands.cache.find((x) => x.name == tosearchapp),
+        };
     }
 }
 exports.Client = Client;

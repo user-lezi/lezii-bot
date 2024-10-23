@@ -1,0 +1,84 @@
+[
+  {
+    "name": "game leaderboard",
+    "category": "Game",
+    "description": {
+      "main": "Lists the best scores in the provided game type.",
+      "more": null
+    },
+    "options": [
+      {
+        "name": "game",
+        "required": true,
+        "type": "String",
+        "description": "The game to list the scores of."
+      }
+    ]
+  },
+  {
+    "name": "game password",
+    "category": "Game",
+    "description": {
+      "main": "Create a password with some fun set of rules.",
+      "more": "Creating a strong password is tough? Password game gives some set of condition that needs to be fulfilled to create a strong and easy to remember password."
+    },
+    "options": []
+  },
+  {
+    "name": "game uncache",
+    "category": "Game",
+    "description": {
+      "main": "Forcefully stop/uncache a running game.",
+      "more": null
+    },
+    "options": [
+      {
+        "name": "game",
+        "required": false,
+        "type": "String",
+        "description": "The game to uncache."
+      }
+    ]
+  },
+  {
+    "name": "define",
+    "category": "Utility",
+    "description": {
+      "main": "Get the definition of the word that you dont know.",
+      "more": "Fetches the defination of the provided word by the user from urban dictionary api."
+    },
+    "options": [
+      {
+        "name": "word",
+        "required": true,
+        "type": "String",
+        "description": "The word to get definition of."
+      }
+    ]
+  },
+  {
+    "name": "help",
+    "category": "Utility",
+    "description": {
+      "main": "Gets the list of commands present in the bot.",
+      "more": "You can even get information about a specfic command by passing the command name too."
+    },
+    "options": [
+      {
+        "name": "command",
+        "required": false,
+        "type": "String",
+        "description": "The command name that you want to get information about."
+      }
+    ]
+  },
+  {
+    "name": "stats",
+    "category": "Utility",
+    "description": {
+      "main": "Displays the bot information/statistics",
+      "more": null
+    },
+    "options": []
+  }
+]

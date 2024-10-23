@@ -6,6 +6,8 @@ import {
   Collection,
   ActivityType,
   User,
+  ApplicationCommand,
+  GuildResolvable,
 } from "discord.js";
 import { CommandManager } from "./commands";
 import { ChemicalElements, ClientUtils } from "./classes/ClientUtils";
@@ -13,6 +15,7 @@ import { ChemicalElements, ClientUtils } from "./classes/ClientUtils";
 import { PasswordGame } from "./classes/Games";
 import chalk from "chalk";
 import { Database } from "discord-channel.db";
+import { ICommand, RawCommands } from "./rawCommands";
 
 export class Client extends _Client<true> {
   public _ = {
@@ -37,6 +40,7 @@ export class Client extends _Client<true> {
     size: 5,
     cacheEvery: 60_000,
   });
+  public rawCommands = RawCommands;
   public customStatuses: Array<(this: Client) => Promise<string>>;
   constructor() {
     super({
@@ -205,5 +209,14 @@ export class Client extends _Client<true> {
       string
     >;
     return res;
+  }
+
+  findCommand(s: string) {
+    let tosearch = s.toLowerCase();
+    let tosearchapp = tosearch.split(" ")[0];
+    return {
+      json: this.rawCommands.find((x) => x.name == tosearch),
+      app: this.application.commands.cache.find((x) => x.name == tosearchapp),
+    };
   }
 }
