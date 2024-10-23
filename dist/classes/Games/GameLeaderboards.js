@@ -102,7 +102,7 @@ class PasswordGameLeaderboard extends BaseLeaderboard {
                         : i <= 4
                             ? exports.LeaderboardEmojis.next
                             : exports.LeaderboardEmojis.other;
-            let head = (0, discord_js_1.bold)(`${i + 1}. ${emoji} ${u}`) + "\n";
+            let head = (0, discord_js_1.heading)((0, discord_js_1.bold)(`${i + 1}. ${emoji} ${u}`) + "\n", discord_js_1.HeadingLevel.Three);
             switch (valueType) {
                 case "length":
                     return (head +

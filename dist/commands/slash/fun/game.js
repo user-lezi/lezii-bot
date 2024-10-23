@@ -42,7 +42,7 @@ exports.default = {
             let list = lb.list();
             let embed = ctx.util
                 .embed()
-                .setDescription(ctx.join((0, discord_js_1.heading)(`Leaderboard`, discord_js_1.HeadingLevel.One), (0, discord_js_1.heading)(_game.name, discord_js_1.HeadingLevel.Two), (0, discord_js_1.heading)(list.join("\n"), discord_js_1.HeadingLevel.Three)))
+                .setDescription(ctx.join((0, discord_js_1.heading)(`Leaderboard`, discord_js_1.HeadingLevel.One), (0, discord_js_1.heading)(_game.name, discord_js_1.HeadingLevel.Two), ...list))
                 .setThumbnail("https://png.pngtree.com/png-vector/20221025/ourmid/pngtree-podiums-for-winners-with-1st-png-image_6376857.png")
                 .setTimestamp()
                 .setFooter({

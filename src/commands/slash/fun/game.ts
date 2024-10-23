@@ -70,7 +70,7 @@ export default {
           ctx.join(
             heading(`Leaderboard`, HeadingLevel.One),
             heading(_game.name, HeadingLevel.Two),
-            heading(list.join("\n"), HeadingLevel.Three),
+            ...list,
           ),
         )
         .setThumbnail(

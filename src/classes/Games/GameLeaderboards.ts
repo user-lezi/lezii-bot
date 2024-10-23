@@ -139,7 +139,10 @@ export class PasswordGameLeaderboard extends BaseLeaderboard<
               : i <= 4
                 ? LeaderboardEmojis.next
                 : LeaderboardEmojis.other;
-      let head = bold(`${i + 1}. ${emoji} ${u}`) + "\n";
+      let head = heading(
+        bold(`${i + 1}. ${emoji} ${u}`) + "\n",
+        HeadingLevel.Three,
+      );
       switch (valueType) {
         case "length":
           return (
